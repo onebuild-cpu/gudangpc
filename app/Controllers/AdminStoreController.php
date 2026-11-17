@@ -236,22 +236,32 @@ class AdminStoreController extends Controller
             return;
         }
 
+        $oldLogo = '';
+        if (isset($store['logo'])) {
+            $oldLogo = (string) $store['logo'];
+        }
+
         try {
             $this->storeModel->delete($id);
-            $_SESSION['success'] = 'Store deleted successfully.';
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Could not delete: ' . $e->getMessage();
+            $this->redirect('/dashboard/stores');
+            return;
+        }
+
+        $_SESSION['success'] = 'Store deleted successfully.';
+
+        try {
             $seo = $this->seoMetaModel->findByMeta('store', $id);
             if ($seo) {
                 $this->seoMetaModel->delete((int) $seo['id']);
             }
-
-            $oldLogo = '';
-            if (isset($store['logo'])) {
-                $oldLogo = (string) $store['logo'];
-            }
-            $this->deleteLogoFile($oldLogo);
         } catch (Exception $e) {
-            $_SESSION['error'] = $e->getMessage();
+            error_log('SEO meta delete failed for store ' . $id . ': ' . $e->getMessage());
+            $_SESSION['warning'] = 'Record deleted, but its SEO meta could not be removed.';
         }
+
+        $this->deleteLogoFile($oldLogo);
         $this->redirect('/dashboard/stores');
     }
 
@@ -284,6 +294,9 @@ class AdminStoreController extends Controller
 
         if ($this->storeModel->slugExists($slug, $ignoreId)) {
             throw new Exception('Slug is already in use.');
+        }
+        if (\App\Core\ReservedSlugs::isReserved($slug)) {
+            throw new Exception('This slug is reserved. Please choose another.');
         }
 
         $rawBaseUrl = '';
@@ -345,6 +358,23 @@ class AdminStoreController extends Controller
      */
     private function collectSeoInput(string $slug): array
     {
+        $isRoot = isset($_SESSION['role']) && $_SESSION['role'] === 'root';
+        if (!$isRoot) {
+            $rawCustomHeadTags = '';
+            $rawCustomBody = '';
+            $rawCustomFooter = '';
+            $rawSchemaMarkup = '';
+        } else {
+            if (isset($_POST['custom_head_tags'])) { $rawCustomHeadTags = $_POST['custom_head_tags']; }
+            else { $rawCustomHeadTags = ''; }
+            if (isset($_POST['custom_body'])) { $rawCustomBody = $_POST['custom_body']; }
+            else { $rawCustomBody = ''; }
+            if (isset($_POST['custom_footer'])) { $rawCustomFooter = $_POST['custom_footer']; }
+            else { $rawCustomFooter = ''; }
+            if (isset($_POST['schema_markup'])) { $rawSchemaMarkup = $_POST['schema_markup']; }
+            else { $rawSchemaMarkup = ''; }
+        }
+
         $rawSeoTitle = '';
         if (isset($_POST['seo_title'])) {
             $rawSeoTitle = $_POST['seo_title'];
@@ -362,6 +392,12 @@ class AdminStoreController extends Controller
             $rawCanonicalUrl = $_POST['canonical_url'];
         }
         $canonicalUrl = Validator::sanitize($rawCanonicalUrl, 255);
+
+        if ($canonicalUrl !== '') {
+            if (!Validator::url($canonicalUrl) || !preg_match('#^https?://#i', $canonicalUrl)) {
+                throw new Exception('Canonical URL is not valid. It must start with http:// or https://. Leave empty to use the page\'s own URL.');
+            }
+        }
 
         $robotsTag = 'index, follow';
         if (isset($_POST['robots_tag']) && $_POST['robots_tag'] !== '') {
@@ -383,28 +419,17 @@ class AdminStoreController extends Controller
         }
         $twitterDescription = Validator::sanitize($rawTwitterDescription, 5000);
 
-        $rawSchemaMarkup = '';
-        if (isset($_POST['schema_markup'])) {
-            $rawSchemaMarkup = $_POST['schema_markup'];
-        }
+        // custom HTML fields are root-only; populated above.
         $schemaMarkup = Validator::sanitize($rawSchemaMarkup, 5000);
 
-        $rawCustomHeadTags = '';
-        if (isset($_POST['custom_head_tags'])) {
-            $rawCustomHeadTags = $_POST['custom_head_tags'];
+        if ($schemaMarkup !== '' && json_decode($schemaMarkup) === null) {
+            throw new Exception('Schema markup must be valid JSON.');
         }
+
         $customHeadTags = Validator::sanitize($rawCustomHeadTags, 5000, true);
 
-        $rawCustomBody = '';
-        if (isset($_POST['custom_body'])) {
-            $rawCustomBody = $_POST['custom_body'];
-        }
         $customBody = Validator::sanitize($rawCustomBody, 5000, true);
 
-        $rawCustomFooter = '';
-        if (isset($_POST['custom_footer'])) {
-            $rawCustomFooter = $_POST['custom_footer'];
-        }
         $customFooter = Validator::sanitize($rawCustomFooter, 5000, true);
 
         return [

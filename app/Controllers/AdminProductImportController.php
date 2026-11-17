@@ -80,6 +80,26 @@ class AdminProductImportController extends Controller
             return;
         }
 
+        if (!is_array($report)) {
+            $_SESSION['error'] = 'The import finished but produced no report.';
+            $this->redirect('/dashboard/products/import');
+            return;
+        }
+
+        $defaults = [
+            'total_rows' => 0,
+            'created_products' => 0,
+            'created_vendors' => 0,
+            'created_offers' => 0,
+            'updated_offers' => 0,
+        ];
+        foreach ($defaults as $key => $val) {
+            if (!isset($report[$key]) || !is_int($report[$key])) {
+                error_log('ProductImporter::importFile() report missing/invalid key: ' . $key);
+                $report[$key] = $val;
+            }
+        }
+
         $_SESSION['import_report'] = $report;
         $_SESSION['success'] = 'Import finished: ' . $report['total_rows'] . ' rows read, '
             . $report['created_products'] . ' products created, '
@@ -139,6 +159,18 @@ class AdminProductImportController extends Controller
 
         if (strpos($head, "\0") !== false) {
             throw new Exception('The uploaded file is not a text CSV file.');
+        }
+
+        $finfo = new \finfo(FILEINFO_MIME_TYPE);
+        $mime  = $finfo->file($temporaryName);
+        $allowed = [
+            'text/plain',
+            'text/csv',
+            'application/csv',
+            'application/vnd.ms-excel',
+        ];
+        if (!in_array($mime, $allowed, true)) {
+            throw new Exception('The uploaded file is not a valid CSV (detected: ' . $mime . ').');
         }
 
         return $file;

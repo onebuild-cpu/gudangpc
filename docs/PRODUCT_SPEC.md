@@ -259,14 +259,14 @@ FOREIGN KEY (product_id) REFERENCES products (id) ON DELETE CASCADE
 
 No `updated_at`.
 
-### `search_cache` (currently unused)
+### `search_cache`
 
-```
-id, query_hash, original_query, parsed_intent, created_at
-PRIMARY KEY (id), UNIQUE (query_hash)
-```
+id, query_text, query_slug, ai_response_json (longtext, JSON-valid),
+result_count, is_indexed, created_at, updated_at
+PRIMARY KEY (id), UNIQUE (query_text), UNIQUE (query_slug)
 
-`SearchCacheModel` exists but nothing reads or writes it. `products.search_tags` is a plain text column used by search.
+Written by SearchCacheModel when AiSearchService parses a query.
+AdminSearchController reads it and toggles is_indexed for sitemap inclusion.
 
 ### Planned schema (not yet applied)
 
@@ -285,6 +285,9 @@ PRIMARY KEY (id), UNIQUE (query_hash)
 ### Not in the database
 
 `spec_definitions`, `product_specs` and any `home` table do not exist. Specs and compare are parked.
+
+ai_response_json is validated by a CHECK (json_valid(...)) constraint.
+Any code that writes to search_cache must produce valid JSON.
 
 ---
 

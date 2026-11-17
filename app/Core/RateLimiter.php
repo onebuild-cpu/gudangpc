@@ -24,6 +24,8 @@ class RateLimiter
         'register'       => ['max' => 3, 'window' => 3600],
         'password_reset' => ['max' => 3, 'window' => 3600],
         'api'            => ['max' => 60, 'window' => 60],
+        'admin_write' => ['max' => 30, 'window' => 60],
+        'ai_search' => ['max' => 20, 'window' => 60],
     ];
 
     public function __construct(PDO $pdo)

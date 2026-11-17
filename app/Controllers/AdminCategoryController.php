@@ -231,26 +231,38 @@ class AdminCategoryController extends Controller
             return;
         }
 
-        try {
-            $this->categoryModel->delete($id);
-            $_SESSION['success'] = 'Category deleted successfully.';
-        } catch (Exception $e) {
-            $_SESSION['error'] = $e->getMessage();
+        if ($this->categoryModel->countByParentId($id) > 0) {
+            $_SESSION['error'] = 'Cannot delete: subcategories still use this category.';
             $this->redirect('/dashboard/categories');
             return;
-        }
-
-        $seo = $this->seoMetaModel->findByMeta('category', $id);
-        if ($seo) {
-            $this->seoMetaModel->delete((int) $seo['id']);
         }
 
         $oldImage = '';
         if (isset($category['image'])) {
             $oldImage = (string) $category['image'];
         }
-        $this->deleteImageFile($oldImage);
 
+        try {
+            $this->categoryModel->delete($id);
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Could not delete: ' . $e->getMessage();
+            $this->redirect('/dashboard/categories');
+            return;
+        }
+
+        $_SESSION['success'] = 'Category deleted successfully.';
+
+        try {
+            $seo = $this->seoMetaModel->findByMeta('category', $id);
+            if ($seo) {
+                $this->seoMetaModel->delete((int) $seo['id']);
+            }
+        } catch (Exception $e) {
+            error_log('SEO meta delete failed for category ' . $id . ': ' . $e->getMessage());
+            $_SESSION['warning'] = 'Record deleted, but its SEO meta could not be removed.';
+        }
+
+        $this->deleteImageFile($oldImage);
         $this->redirect('/dashboard/categories');
     }
 
@@ -281,9 +293,7 @@ class AdminCategoryController extends Controller
             throw new Exception('Category slug is required.');
         }
 
-        if (Validator::inArray($slug, ['login','logout','register','verify-email','member','dashboard','categories',
-        'brands','brand','compare','go','wishlist','csp-report','uploads','assets','favicon','robots','category',
-        'product','store','search','auth','sitemap'])) {
+        if (\App\Core\ReservedSlugs::isReserved($slug)) {
             throw new Exception('This slug is reserved. Please choose another.');
         }
 
@@ -334,6 +344,23 @@ class AdminCategoryController extends Controller
      */
     private function collectSeoInput(string $slug): array
     {
+        $isRoot = isset($_SESSION['role']) && $_SESSION['role'] === 'root';
+        if (!$isRoot) {
+            $rawCustomHeadTags = '';
+            $rawCustomBody = '';
+            $rawCustomFooter = '';
+            $rawSchemaMarkup = '';
+        } else {
+            if (isset($_POST['custom_head_tags'])) { $rawCustomHeadTags = $_POST['custom_head_tags']; }
+            else { $rawCustomHeadTags = ''; }
+            if (isset($_POST['custom_body'])) { $rawCustomBody = $_POST['custom_body']; }
+            else { $rawCustomBody = ''; }
+            if (isset($_POST['custom_footer'])) { $rawCustomFooter = $_POST['custom_footer']; }
+            else { $rawCustomFooter = ''; }
+            if (isset($_POST['schema_markup'])) { $rawSchemaMarkup = $_POST['schema_markup']; }
+            else { $rawSchemaMarkup = ''; }
+        }
+
         $rawSeoTitle = '';
         if (isset($_POST['seo_title'])) {
             $rawSeoTitle = $_POST['seo_title'];
@@ -351,6 +378,12 @@ class AdminCategoryController extends Controller
             $rawCanonicalUrl = $_POST['canonical_url'];
         }
         $canonicalUrl = Validator::sanitize($rawCanonicalUrl, 255);
+
+        if ($canonicalUrl !== '') {
+            if (!Validator::url($canonicalUrl) || !preg_match('#^https?://#i', $canonicalUrl)) {
+                throw new Exception('Canonical URL is not valid. It must start with http:// or https://. Leave empty to use the page\'s own URL.');
+            }
+        }
 
         $robotsTag = 'index, follow';
         if (isset($_POST['robots_tag']) && $_POST['robots_tag'] !== '') {
@@ -372,28 +405,17 @@ class AdminCategoryController extends Controller
         }
         $twitterDescription = Validator::sanitize($rawTwitterDescription, 5000);
 
-        $rawSchemaMarkup = '';
-        if (isset($_POST['schema_markup'])) {
-            $rawSchemaMarkup = $_POST['schema_markup'];
-        }
+        // custom HTML fields are root-only; populated above.
         $schemaMarkup = Validator::sanitize($rawSchemaMarkup, 5000);
 
-        $rawCustomHeadTags = '';
-        if (isset($_POST['custom_head_tags'])) {
-            $rawCustomHeadTags = $_POST['custom_head_tags'];
+        if ($schemaMarkup !== '' && json_decode($schemaMarkup) === null) {
+            throw new Exception('Schema markup must be valid JSON.');
         }
+
         $customHeadTags = Validator::sanitize($rawCustomHeadTags, 5000, true);
 
-        $rawCustomBody = '';
-        if (isset($_POST['custom_body'])) {
-            $rawCustomBody = $_POST['custom_body'];
-        }
         $customBody = Validator::sanitize($rawCustomBody, 5000, true);
 
-        $rawCustomFooter = '';
-        if (isset($_POST['custom_footer'])) {
-            $rawCustomFooter = $_POST['custom_footer'];
-        }
         $customFooter = Validator::sanitize($rawCustomFooter, 5000, true);
 
         return [

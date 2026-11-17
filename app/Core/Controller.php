@@ -140,6 +140,10 @@ abstract class Controller
      */
     protected function processAndSaveImage(array $file, string $uploadDir, string $prefix): string
     {
+        if (!isset($file['error']) || $file['error'] !== UPLOAD_ERR_OK) {
+            throw new Exception('Upload failed or file was incomplete.');
+        }
+
         $allowedMimes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
         $maxSize = 2 * 1024 * 1024;
 
@@ -188,6 +192,13 @@ abstract class Controller
 
         $destination = $absoluteDir . $filename;
         $saved = imagewebp($source, $destination, 85);
+        if ($saved && !is_file($destination)) {
+            $saved = false;
+        }
+        if ($saved && filesize($destination) === 0) {
+            $saved = false;
+            @unlink($destination);
+        }
         imagedestroy($source);
 
         if (!$saved) {

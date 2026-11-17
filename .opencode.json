@@ -1,5 +1,0 @@
-{
-  "provider": "ollama",
-  "model": "kimi-k2.7-code:cloud",
-  "baseUrl": "http://localhost:11434"
-}

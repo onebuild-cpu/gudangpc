@@ -7,7 +7,15 @@ namespace App\Core;
 
 class Validator {
     /**
-     * Sanitize string input
+     * Sanitize a string input.
+     *
+     * IMPORTANT: $allowHtml = true is NOT a safe HTML filter. It only skips
+     * strip_tags(). Callers MUST pass the result through a proper HTML
+     * sanitizer (e.g. App\Core\RichText::clean()) before printing, or the
+     * value must only be writable by root users.
+     *
+     * For plain text (default), strip_tags() plus NUL-byte removal is used.
+     * Length is measured with mb_* so UTF-8 is preserved.
      */
     public static function sanitize(string $input, int $maxLength = 255, bool $allowHtml = false): string {
         $input = trim($input);
@@ -19,9 +27,9 @@ class Validator {
         // Remove null bytes
         $input = str_replace("\0", '', $input);
         
-        // Limit length
-        if (strlen($input) > $maxLength) {
-            $input = substr($input, 0, $maxLength);
+        // Limit length (mbstring-aware so UTF-8 is never cut mid-byte).
+        if (mb_strlen($input, 'UTF-8') > $maxLength) {
+            $input = mb_substr($input, 0, $maxLength, 'UTF-8');
         }
         
         return $input;

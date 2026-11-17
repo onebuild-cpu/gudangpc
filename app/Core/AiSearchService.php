@@ -196,14 +196,16 @@ class AiSearchService
 
             $url = 'https://generativelanguage.googleapis.com/v1beta/models/'
                 . self::GEMINI_MODEL
-                . ':generateContent?key='
-                . rawurlencode($this->apiKey);
+                . ':generateContent';
 
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $body);
-            curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+            curl_setopt($ch, CURLOPT_HTTPHEADER, [
+                'Content-Type: application/json',
+                'x-goog-api-key: ' . $this->apiKey,
+            ]);
             curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
             curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
             curl_setopt($ch, CURLOPT_TIMEOUT, 15);

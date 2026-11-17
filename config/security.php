@@ -11,16 +11,16 @@ $httpHost = '';
 if (isset($_SERVER['HTTP_HOST'])) {
     $httpHost = $_SERVER['HTTP_HOST'];
 }
-$isLocalhost = in_array($httpHost, [
-    'localhost',
-    '127.0.0.1',
-    'onebuild.test',
-    'www.onebuild.test',
-    'gudangpc.test',
-    'www.gudangpc.test',
-    'localhost:8080',
-    '127.0.0.1:8080',
-]);
+$hostOnly = strtolower(explode(':', $httpHost)[0]);
+$isLocalhost = in_array($hostOnly, ['localhost', '127.0.0.1'], true)
+    || str_ends_with($hostOnly, '.test')
+    || str_ends_with($hostOnly, '.local')
+    || preg_match('/^(10\.|172\.(1[6-9]|2[0-9]|3[01])\.|192\.168\.)/', $hostOnly) === 1;
+
+$appEnv = getenv('APP_ENV');
+if ($appEnv !== false && $appEnv !== '') {
+    $isLocalhost = ($appEnv !== 'production');
+}
 
 $isHTTPS = false;
 if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {

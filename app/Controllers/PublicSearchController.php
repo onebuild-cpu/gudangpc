@@ -79,6 +79,17 @@ class PublicSearchController extends Controller
             }
         }
 
+        try {
+            $limiter = new \App\Core\RateLimiter($this->pdo);
+            $limiter->consume('ai_search', 'ai_search');
+        } catch (\App\Core\RateLimitException $e) {
+            $_SESSION['error'] = 'Too many searches. Please wait '
+                . \App\Core\RateLimiter::formatRetryAfter($e->getRetryAfter())
+                . ' and try again.';
+            $this->redirect('/search');
+            return;
+        }
+
         $parsed = $this->aiSearchService->parseQuery($normalized);
         if ($parsed === null) {
             $this->renderFallback($normalized);
@@ -292,6 +303,17 @@ class PublicSearchController extends Controller
                 'result_count' => $resultCount,
                 'ai_response' => $cachedResponse,
             ]);
+            return;
+        }
+
+        try {
+            $limiter = new \App\Core\RateLimiter($this->pdo);
+            $limiter->consume('ai_search', 'ai_search');
+        } catch (\App\Core\RateLimitException $e) {
+            $_SESSION['error'] = 'Too many searches. Please wait '
+                . \App\Core\RateLimiter::formatRetryAfter($e->getRetryAfter())
+                . ' and try again.';
+            $this->redirect('/search');
             return;
         }
 

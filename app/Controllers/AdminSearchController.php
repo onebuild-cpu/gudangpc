@@ -5,6 +5,8 @@ use PDO;
 use App\Core\Controller;
 use App\Core\CsrfProtection;
 use App\Core\Validator;
+use App\Core\RateLimiter;
+use App\Core\RateLimitException;
 use App\Models\SearchCacheModel;
 use Exception;
 
@@ -82,6 +84,15 @@ class AdminSearchController extends Controller
         }
 
         CsrfProtection::requireValidToken();
+
+        try {
+            $limiter = new RateLimiter($this->pdo);
+            $limiter->consume('admin_write:' . (int) $_SESSION['user_id'], 'admin_write');
+        } catch (RateLimitException $e) {
+            $_SESSION['error'] = 'Too many changes. Please wait ' . RateLimiter::formatRetryAfter($e->getRetryAfter()) . '.';
+            $this->redirect('/dashboard/search');
+            return;
+        }
 
         $id = (int) $id;
 

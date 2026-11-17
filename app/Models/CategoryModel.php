@@ -51,4 +51,15 @@ class CategoryModel extends Model
 
         return false;
     }
+
+    /**
+     * Count the categories whose parent_id points at the given category.
+     */
+    public function countByParentId(int $parentId): int
+    {
+        $sql = "SELECT COUNT(*) FROM `categories` WHERE `parent_id` = :parent_id";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute(['parent_id' => $parentId]);
+        return (int) $stmt->fetchColumn();
+    }
 }

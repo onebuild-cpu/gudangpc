@@ -28,7 +28,7 @@ class AdminSettingController extends Controller
      */
     public function index(): void
     {
-        $this->requireAdmin();
+        $this->requireRoot();
 
         $rows = $this->settingModel->findAll('setting_key ASC');
 
@@ -52,7 +52,7 @@ class AdminSettingController extends Controller
      */
     public function update(): void
     {
-        $this->requireAdmin();
+        $this->requireRoot();
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
             $this->redirect('/dashboard/settings');

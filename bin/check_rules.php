@@ -16,6 +16,12 @@
 // Set to false if '??' should be allowed. Ternary and '?:' are always banned.
 $banNullCoalescing = true;
 
+require_once __DIR__ . '/../app/Core/ReservedSlugs.php';
+if (getenv('APP_ENV') !== 'production') {
+    assert(\App\Core\ReservedSlugs::isReserved('dashboard') === true);
+    assert(\App\Core\ReservedSlugs::isReserved('gpu-murah') === false);
+}
+
 $root = dirname(__DIR__);
 $targets = [];
 if ($argc > 1) {

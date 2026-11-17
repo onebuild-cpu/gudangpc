@@ -5,6 +5,8 @@ use PDO;
 use App\Core\Controller;
 use App\Core\CsrfProtection;
 use App\Core\Validator;
+use App\Core\RateLimiter;
+use App\Core\RateLimitException;
 use App\Models\ProductModel;
 use App\Models\OfferModel;
 use App\Models\SeoMetaModel;
@@ -81,9 +83,8 @@ class AdminProductController extends Controller
         if ($totalPages < 1) {
             $totalPages = 1;
         }
-        if ($page > $totalPages && $page > 1) {
-            $this->redirect('/dashboard/products');
-            return;
+        if ($page > $totalPages) {
+            $page = $totalPages;
         }
 
         $offset = ($page - 1) * $perPage;
@@ -348,22 +349,41 @@ class AdminProductController extends Controller
             return;
         }
 
+        foreach ($this->offerModel->findByProductId($id) as $existingOffer) {
+            $offerClicks = $this->clickModel->countByOfferId((int) $existingOffer['id']);
+            if ($offerClicks > 0) {
+                $_SESSION['error'] = 'This product has offers with click history. Set it to Draft instead.';
+                $this->redirect('/dashboard/products');
+                return;
+            }
+        }
+
+        $oldImage = '';
+        if (isset($product['image'])) {
+            $oldImage = (string) $product['image'];
+        }
+
         try {
             $this->productModel->delete($id);
+        } catch (Exception $e) {
+            $_SESSION['error'] = 'Could not delete: ' . $e->getMessage();
+            $this->redirect('/dashboard/products');
+            return;
+        }
+
+        $_SESSION['success'] = 'Product deleted successfully.';
+
+        try {
             $seo = $this->seoMetaModel->findByMeta('product', $id);
             if ($seo) {
                 $this->seoMetaModel->delete((int) $seo['id']);
             }
-
-            $oldImage = '';
-            if (isset($product['image'])) {
-                $oldImage = (string) $product['image'];
-            }
-            $this->deleteImageFile($oldImage);
-            $_SESSION['success'] = 'Product deleted successfully.';
         } catch (Exception $e) {
-            $_SESSION['error'] = $e->getMessage();
+            error_log('SEO meta delete failed for product ' . $id . ': ' . $e->getMessage());
+            $_SESSION['warning'] = 'Record deleted, but its SEO meta could not be removed.';
         }
+
+        $this->deleteImageFile($oldImage);
         $this->redirect('/dashboard/products');
     }
 
@@ -380,6 +400,15 @@ class AdminProductController extends Controller
         }
 
         CsrfProtection::requireValidToken();
+
+        try {
+            $limiter = new RateLimiter($this->pdo);
+            $limiter->consume('admin_write:' . (int) $_SESSION['user_id'], 'admin_write');
+        } catch (RateLimitException $e) {
+            $_SESSION['error'] = 'Too many changes. Please wait ' . RateLimiter::formatRetryAfter($e->getRetryAfter()) . '.';
+            $this->redirect('/dashboard/products/' . (int) $id . '/edit');
+            return;
+        }
 
         $productId = (int) $id;
         $product = $this->productModel->findById($productId);
@@ -450,16 +479,24 @@ class AdminProductController extends Controller
                 $inStock = 0;
             }
 
-            $newOfferId = $this->offerModel->insert([
-                'product_id' => $productId,
-                'store_id' => $storeId,
-                'vendor_id' => $vendorId,
-                'price_idr' => $priceIdr,
-                'affiliate_url' => $affiliateUrl,
-                'in_stock' => $inStock,
-                'status' => 'published',
-                'last_checked_at' => date('Y-m-d H:i:s'),
-            ]);
+            try {
+                $newOfferId = $this->offerModel->insert([
+                    'product_id' => $productId,
+                    'store_id' => $storeId,
+                    'vendor_id' => $vendorId,
+                    'price_idr' => $priceIdr,
+                    'affiliate_url' => $affiliateUrl,
+                    'in_stock' => $inStock,
+                    'status' => 'published',
+                    'last_checked_at' => date('Y-m-d H:i:s'),
+                ]);
+            } catch (\PDOException $e) {
+                if ($e->getCode() === '23000') {
+                    throw new Exception('This vendor already has an offer for this product.');
+                }
+                throw $e;
+            }
+
             $this->priceHistoryModel->record($newOfferId, $priceIdr);
             $_SESSION['success'] = 'Offer added successfully.';
         } catch (Exception $e) {
@@ -482,6 +519,15 @@ class AdminProductController extends Controller
         }
 
         CsrfProtection::requireValidToken();
+
+        try {
+            $limiter = new RateLimiter($this->pdo);
+            $limiter->consume('admin_write:' . (int) $_SESSION['user_id'], 'admin_write');
+        } catch (RateLimitException $e) {
+            $_SESSION['error'] = 'Too many changes. Please wait ' . RateLimiter::formatRetryAfter($e->getRetryAfter()) . '.';
+            $this->redirect('/dashboard/products/' . (int) $productId . '/edit');
+            return;
+        }
 
         $productId = (int) $productId;
         $offerId = (int) $offerId;
@@ -550,6 +596,15 @@ class AdminProductController extends Controller
 
         CsrfProtection::requireValidToken();
 
+        try {
+            $limiter = new RateLimiter($this->pdo);
+            $limiter->consume('admin_write:' . (int) $_SESSION['user_id'], 'admin_write');
+        } catch (RateLimitException $e) {
+            $_SESSION['error'] = 'Too many changes. Please wait ' . RateLimiter::formatRetryAfter($e->getRetryAfter()) . '.';
+            $this->redirect('/dashboard/products/' . (int) $productId . '/edit');
+            return;
+        }
+
         $productId = (int) $productId;
         $offerId = (int) $offerId;
 
@@ -604,6 +659,9 @@ class AdminProductController extends Controller
 
         if ($this->productModel->slugExists($slug, $ignoreId)) {
             throw new Exception('Slug is already in use.');
+        }
+        if (\App\Core\ReservedSlugs::isReserved($slug)) {
+            throw new Exception('This slug is reserved. Please choose another.');
         }
 
         $rawCategoryId = '';
@@ -683,6 +741,23 @@ class AdminProductController extends Controller
      */
     private function collectSeoInput(string $slug, string $categorySlug): array
     {
+        $isRoot = isset($_SESSION['role']) && $_SESSION['role'] === 'root';
+        if (!$isRoot) {
+            $rawCustomHeadTags = '';
+            $rawCustomBody = '';
+            $rawCustomFooter = '';
+            $rawSchemaMarkup = '';
+        } else {
+            if (isset($_POST['custom_head_tags'])) { $rawCustomHeadTags = $_POST['custom_head_tags']; }
+            else { $rawCustomHeadTags = ''; }
+            if (isset($_POST['custom_body'])) { $rawCustomBody = $_POST['custom_body']; }
+            else { $rawCustomBody = ''; }
+            if (isset($_POST['custom_footer'])) { $rawCustomFooter = $_POST['custom_footer']; }
+            else { $rawCustomFooter = ''; }
+            if (isset($_POST['schema_markup'])) { $rawSchemaMarkup = $_POST['schema_markup']; }
+            else { $rawSchemaMarkup = ''; }
+        }
+
         $rawSeoTitle = '';
         if (isset($_POST['seo_title'])) {
             $rawSeoTitle = $_POST['seo_title'];
@@ -700,6 +775,12 @@ class AdminProductController extends Controller
             $rawCanonicalUrl = $_POST['canonical_url'];
         }
         $canonicalUrl = Validator::sanitize($rawCanonicalUrl, 255);
+
+        if ($canonicalUrl !== '') {
+            if (!Validator::url($canonicalUrl) || !preg_match('#^https?://#i', $canonicalUrl)) {
+                throw new Exception('Canonical URL is not valid. It must start with http:// or https://. Leave empty to use the page\'s own URL.');
+            }
+        }
 
         $robotsTag = 'index, follow';
         if (isset($_POST['robots_tag']) && $_POST['robots_tag'] !== '') {
@@ -721,28 +802,17 @@ class AdminProductController extends Controller
         }
         $twitterDescription = Validator::sanitize($rawTwitterDescription, 5000);
 
-        $rawSchemaMarkup = '';
-        if (isset($_POST['schema_markup'])) {
-            $rawSchemaMarkup = $_POST['schema_markup'];
-        }
+        // custom HTML fields are root-only; populated above.
         $schemaMarkup = Validator::sanitize($rawSchemaMarkup, 5000);
 
-        $rawCustomHeadTags = '';
-        if (isset($_POST['custom_head_tags'])) {
-            $rawCustomHeadTags = $_POST['custom_head_tags'];
+        if ($schemaMarkup !== '' && json_decode($schemaMarkup) === null) {
+            throw new Exception('Schema markup must be valid JSON.');
         }
+
         $customHeadTags = Validator::sanitize($rawCustomHeadTags, 5000, true);
 
-        $rawCustomBody = '';
-        if (isset($_POST['custom_body'])) {
-            $rawCustomBody = $_POST['custom_body'];
-        }
         $customBody = Validator::sanitize($rawCustomBody, 5000, true);
 
-        $rawCustomFooter = '';
-        if (isset($_POST['custom_footer'])) {
-            $rawCustomFooter = $_POST['custom_footer'];
-        }
         $customFooter = Validator::sanitize($rawCustomFooter, 5000, true);
 
         return [
