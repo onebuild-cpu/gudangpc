@@ -22,8 +22,6 @@ CREATE TABLE `brands` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
 --
 -- Table structure for table `categories`
 --
@@ -42,8 +40,6 @@ CREATE TABLE `categories` (
   `image_alt` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
 --
 -- Table structure for table `members`
 --
@@ -60,8 +56,6 @@ CREATE TABLE `members` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `whatsapp` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `offers`
@@ -88,8 +82,6 @@ CREATE TABLE `offers` (
   `external_id` varchar(100) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
 --
 -- Table structure for table `offer_clicks`
 --
@@ -103,8 +95,6 @@ CREATE TABLE `offer_clicks` (
   `referer` varchar(255) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
 --
 -- Table structure for table `price_history`
 --
@@ -115,8 +105,6 @@ CREATE TABLE `price_history` (
   `price_idr` bigint(20) UNSIGNED NOT NULL,
   `recorded_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `products`
@@ -141,8 +129,6 @@ CREATE TABLE `products` (
   `search_tags` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
 --
 -- Table structure for table `rate_limits`
 --
@@ -157,21 +143,33 @@ CREATE TABLE `rate_limits` (
   `updated_at` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
 --
 -- Table structure for table `search_cache`
 --
 
 CREATE TABLE `search_cache` (
   `id` int(11) NOT NULL,
-  `query_hash` char(64) NOT NULL,
-  `original_query` varchar(255) NOT NULL,
-  `parsed_intent` text NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `query_text` varchar(255) NOT NULL,
+  `query_slug` varchar(255) NOT NULL,
+  `ai_response_json` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`ai_response_json`)),
+  `result_count` int(11) DEFAULT 0,
+  `is_indexed` tinyint(1) DEFAULT 1,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
+--
+-- Dumping data for table `search_cache`
+--
+
+INSERT INTO `search_cache` (`id`, `query_text`, `query_slug`, `ai_response_json`, `result_count`, `is_indexed`, `created_at`, `updated_at`) VALUES
+(1, 'gpu murah untuk valorant', 'gpu-murah-untuk-valorant', '{\"category_slug\":\"graphics-card\",\"keywords\":[\"GPU\",\"Valorant\"],\"sort\":\"price_asc\",\"max_price\":null,\"min_price\":null}', 5, 1, '2026-11-16 21:08:34', '2026-11-16 21:08:34'),
+(2, 'cpu untuk main game', 'cpu-untuk-main-game', '{\"category_slug\":\"processor\",\"keywords\":[\"CPU\",\"game\"],\"sort\":\"popular\",\"max_price\":null,\"min_price\":null}', 5, 1, '2026-11-16 21:42:22', '2026-11-16 21:42:22'),
+(3, 'kartu grafis untuk video', 'kartu-grafis-untuk-video', '{\"category_slug\":\"graphics-card\",\"keywords\":[\"kartu grafis\",\"video\"],\"sort\":\"popular\",\"max_price\":null,\"min_price\":null}', 0, 1, '2026-11-16 21:42:37', '2026-11-16 21:42:37'),
+(4, 'kartu grafis untuk video editing', 'kartu-grafis-untuk-video-editing', '{\"category_slug\":\"graphics-card\",\"keywords\":[\"kartu grafis\",\"video editing\"],\"sort\":\"popular\",\"max_price\":null,\"min_price\":null}', 0, 1, '2026-11-16 21:42:48', '2026-11-16 21:42:48'),
+(5, 'monitor untuk gaming', 'monitor-untuk-gaming', '{\"category_slug\":\"monitor\",\"keywords\":[\"monitor\"],\"sort\":\"popular\",\"max_price\":null,\"min_price\":null}', 5, 1, '2026-11-16 22:13:05', '2026-11-16 22:13:05'),
+(6, 'gadget keren', 'gadget-keren', '{\"category_slug\":null,\"keywords\":[],\"sort\":\"popular\",\"max_price\":null,\"min_price\":null}', 54, 1, '2026-11-16 22:13:23', '2026-11-16 22:13:23'),
+(7, 'casing untuk office', 'casing-untuk-office', '{\"category_slug\":\"casing\",\"keywords\":[\"case\"],\"sort\":\"popular\",\"max_price\":null,\"min_price\":null}', 5, 1, '2026-11-16 22:13:40', '2026-11-16 22:13:40');
 
 --
 -- Table structure for table `seo_meta`
@@ -198,8 +196,6 @@ CREATE TABLE `seo_meta` (
   `custom_footer` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
 --
 -- Table structure for table `settings`
 --
@@ -211,20 +207,6 @@ CREATE TABLE `settings` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `settings`
---
-
-INSERT INTO `settings` (`id`, `setting_key`, `setting_value`, `created_at`, `updated_at`) VALUES
-(1, 'default_schema', '<!-- Test Schema -->', '2026-11-10 04:21:25', '2026-11-10 04:21:25'),
-(2, 'default_custom_head', '<!-- Test Head -->', '2026-11-10 04:21:25', '2026-11-10 04:21:25'),
-(3, 'default_custom_body', '<!-- Test Body -->', '2026-11-10 04:21:25', '2026-11-10 04:21:25'),
-(4, 'default_custom_footer', '<!-- Test Footer -->', '2026-11-10 04:21:25', '2026-11-10 04:21:25'),
-(5, 'default_og_desc', '<!-- Test OG -->', '2026-11-10 04:21:25', '2026-11-10 04:21:25'),
-(6, 'default_twitter_desc', '<!-- Test Twitter -->', '2026-11-10 04:21:25', '2026-11-10 04:21:25');
-
--- --------------------------------------------------------
 
 --
 -- Table structure for table `stores`
@@ -245,22 +227,20 @@ CREATE TABLE `stores` (
   `affiliate_url_template` varchar(500) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
-
 --
 -- Table structure for table `users`
 --
 
 CREATE TABLE `users` (
-  `id` int(11) NOT NULL,
-  `phone` varchar(20) NOT NULL,
-  `username` varchar(50) DEFAULT NULL,
-  `password` varchar(255) NOT NULL,
-  `role` varchar(32) NOT NULL,
-  `avatar` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `is_verified` tinyint(1) NOT NULL DEFAULT 0,
+  `id` int NOT NULL,
+  `phone` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `username` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `role` varchar(32) COLLATE utf8mb4_general_ci NOT NULL,
+  `avatar` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `is_verified` tinyint(1) NOT NULL DEFAULT '0',
   `last_login_at` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -269,9 +249,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `phone`, `username`, `password`, `role`, `avatar`, `created_at`, `updated_at`, `is_verified`, `last_login_at`) VALUES
-(1, '+6281234567890', 'root', '$argon2id$v=19$m=65536,t=4,p=1$cXRHc2FUWXhmTmQ0eEJibQ$0y3UMDWSXCjsEKh+0hwfx9PYi98ERW78iyKoIIu9szQ', 'root', '/uploads/avatars/avatar_2_1794305045.jpg', '2026-11-10 08:14:28', '2026-11-16 02:32:02', 1, '2026-11-16 09:32:02');
-
--- --------------------------------------------------------
+(1, '+6281234567890', 'root', '$argon2id$v=19$m=65536,t=4,p=1$cXRHc2FUWXhmTmQ0eEJibQ$0y3UMDWSXCjsEKh+0hwfx9PYi98ERW78iyKoIIu9szQ', 'root', '/uploads/avatars/avatar_2_1794305045.jpg', '2026-11-10 01:14:28', '2026-11-15 19:32:02', 1, '2026-11-16 09:32:02');
 
 --
 -- Table structure for table `user_social_accounts`
@@ -286,7 +264,6 @@ CREATE TABLE `user_social_accounts` (
   `updated_at` datetime NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- --------------------------------------------------------
 
 --
 -- Table structure for table `vendors`
@@ -314,10 +291,6 @@ CREATE TABLE `wishlists` (
   `product_id` int(11) NOT NULL,
   `created_at` timestamp NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Indexes for dumped tables
---
 
 --
 -- Indexes for table `brands`
@@ -387,7 +360,8 @@ ALTER TABLE `rate_limits`
 --
 ALTER TABLE `search_cache`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `query_hash` (`query_hash`);
+  ADD UNIQUE KEY `query_text` (`query_text`),
+  ADD UNIQUE KEY `query_slug` (`query_slug`);
 
 --
 -- Indexes for table `seo_meta`
@@ -468,19 +442,19 @@ ALTER TABLE `members`
 -- AUTO_INCREMENT for table `offers`
 --
 ALTER TABLE `offers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=211;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=214;
 
 --
 -- AUTO_INCREMENT for table `offer_clicks`
 --
 ALTER TABLE `offer_clicks`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `price_history`
 --
 ALTER TABLE `price_history`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=382;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=385;
 
 --
 -- AUTO_INCREMENT for table `products`
@@ -492,19 +466,19 @@ ALTER TABLE `products`
 -- AUTO_INCREMENT for table `rate_limits`
 --
 ALTER TABLE `rate_limits`
-  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=36;
+  MODIFY `id` int(10) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `search_cache`
 --
 ALTER TABLE `search_cache`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `seo_meta`
 --
 ALTER TABLE `seo_meta`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `settings`
