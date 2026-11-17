@@ -1,0 +1,108 @@
+# =========================
+# General rules (ALL bots)
+# =========================
+User-agent: *
+Disallow: /dashboard
+Disallow: /login
+Disallow: /logout
+Disallow: /register
+Disallow: /member
+Disallow: /go/
+Disallow: /search
+Disallow: /wishlist/
+
+Sitemap: https://gudangpc.com/sitemap.xml
+
+
+# =========================
+# OpenAI (ChatGPT)
+# =========================
+User-agent: GPTBot
+Disallow: /dashboard
+Disallow: /login
+Disallow: /logout
+Disallow: /register
+Disallow: /member
+Disallow: /go/
+Disallow: /search
+Disallow: /wishlist/
+
+
+# =========================
+# Google AI / Extended usage
+# =========================
+User-agent: Google-Extended
+Disallow: /dashboard
+Disallow: /login
+Disallow: /logout
+Disallow: /register
+Disallow: /member
+Disallow: /go/
+Disallow: /search
+Disallow: /wishlist/
+
+User-agent: CloudVertexBot
+Disallow: /dashboard
+Disallow: /login
+Disallow: /logout
+Disallow: /register
+Disallow: /member
+Disallow: /go/
+Disallow: /search
+Disallow: /wishlist/
+
+
+# =========================
+# Anthropic (Claude)
+# =========================
+User-agent: ClaudeBot
+Disallow: /dashboard
+Disallow: /login
+Disallow: /logout
+Disallow: /register
+Disallow: /member
+Disallow: /go/
+Disallow: /search
+Disallow: /wishlist/
+
+
+# =========================
+# Perplexity AI
+# =========================
+User-agent: PerplexityBot
+Disallow: /dashboard
+Disallow: /login
+Disallow: /logout
+Disallow: /register
+Disallow: /member
+Disallow: /go/
+Disallow: /search
+Disallow: /wishlist/
+
+
+# =========================
+# Apple Intelligence
+# =========================
+User-agent: Applebot-Extended
+Disallow: /dashboard
+Disallow: /login
+Disallow: /logout
+Disallow: /register
+Disallow: /member
+Disallow: /go/
+Disallow: /search
+Disallow: /wishlist/
+
+
+# =========================
+# Common Crawl (used by many LLMs)
+# =========================
+User-agent: CCBot
+Disallow: /dashboard
+Disallow: /login
+Disallow: /logout
+Disallow: /register
+Disallow: /member
+Disallow: /go/
+Disallow: /search
+Disallow: /wishlist/
