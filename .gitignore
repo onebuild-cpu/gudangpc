@@ -17,3 +17,9 @@ bin/scraper/*.xlsx
 
 .venv/
 *.zip
+
+# Local artifacts
+dumps/
+check-tickets.ps1
+database/backup_*.sql
+.env-example.local
