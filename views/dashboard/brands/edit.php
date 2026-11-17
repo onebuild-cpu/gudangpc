@@ -247,7 +247,6 @@ if ($robotsTagValue === 'noindex, follow') {
                                     <textarea class="form-control" id="twitter_description" name="twitter_description" rows="3"><?= htmlspecialchars((string) $twitterDescriptionValue) ?></textarea>
                                 </div>
 
-                                <?php if (isset($_SESSION['role']) && $_SESSION['role'] === 'root'): ?>
                                 <div class="mb-3">
                                     <label for="schema_markup" class="form-label">Schema Markup</label>
                                     <textarea class="form-control" id="schema_markup" name="schema_markup" rows="6" placeholder="Paste JSON-LD here"><?= htmlspecialchars((string) $schemaMarkupValue) ?></textarea>
@@ -270,7 +269,6 @@ if ($robotsTagValue === 'noindex, follow') {
                                     <textarea class="form-control" id="custom_footer" name="custom_footer" rows="4"><?= htmlspecialchars((string) $customFooterValue) ?></textarea>
                                     <div class="form-text">Paste custom tags here. They will be injected before the closing &lt;/body&gt; of this specific brand page.</div>
                                 </div>
-                                <?php endif; ?>
                             </div>
                         </div>
 
