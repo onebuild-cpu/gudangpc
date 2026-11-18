@@ -25,7 +25,7 @@
         <div class="brand-container">
             <span class="brand-display">Gudang<span class="red">PC</span></span>
             <h1><strong>Banyak Toko, Satu Gudang!</strong><h1>
-            <h2 class="hero-tagline">Cari harga lebih murah, nggak pakai ribet.</h2>
+            <h2 class="hero-tagline">Cari Harga Lebih Murah, Nggak Pakai Ribet.</h2>
         </div>
     </section>
 
