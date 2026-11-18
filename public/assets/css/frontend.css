@@ -56,7 +56,7 @@ html, body {
 /* The Hero Section */
 .parallax-hero {
     position: relative;
-    width: 100vw;
+    width: auto;
     height: 100vh;
     overflow: hidden;
     background-color: #ffffff;
@@ -441,4 +441,66 @@ html, body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+@media (max-width: 1024px) {
+    .parallax-layer img {
+        height: 180vh;
+    }
+    .brand-container {
+        transform: translate(-50%, -20%);
+    }
+}
+
+@media (max-width: 980px) {
+    .parallax-layer img {
+        width: 200%;
+        height: 100vh;
+    }
+    .brand-container {
+        transform: translate(-50%, -130%);
+    }
+}
+
+@media (max-width: 640px) {
+    .parallax-layer img {
+        width: 200%;
+    }
+    .brand-container {
+        transform: translate(-50%, -70%);
+    }
+    .brand-container h1 {
+        font-size: 1.2rem;
+        line-weight: 0.9;
+    }
+    .brand-container h2 {
+        font-size: 0.95rem;
+        line-weight: 0.5;
+    }
+}
+
+@media (max-width: 460px) {
+    .parallax-layer img {
+        width: 200%;
+    }
+    .brand-container {
+        transform: translate(-50%, -120%);
+    }
+    .brand-container h1 {
+        font-size: 1.5rem;
+        line-weight: 0.9;
+    }
+    .brand-container h2 {
+        font-size: 0.95rem;
+        line-weight: 0.5;
+    }
+}
+
+@media (max-width: 380px) {
+    .parallax-layer img {
+        width: 200%;
+    }
+    .brand-container {
+        transform: translate(-50%, -110%);
+    }
 }
