@@ -10,16 +10,16 @@
         </div>
 
         <!-- Layer 2: Middle -->
-        <div class="parallax-layer layer-2" data-speed="0.5">
+        <!-- <div class="parallax-layer layer-2" data-speed="0.5">
             <img src="<?= $base ?>/uploads/images/layer2-middle.webp" alt="Layer 2: Middle" class="parallax-img">
             <div class="parallax-fallback">LAYER 2 (Medium Items)</div>
-        </div>
+        </div> -->
 
         <!-- Layer 3: Foreground -->
-        <div class="parallax-layer layer-3" data-speed="0.8">
+        <!-- <div class="parallax-layer layer-3" data-speed="0.8">
             <img src="<?= $base ?>/uploads/images/layer3-foreground.webp" alt="Layer 3: Foreground" class="parallax-img">
             <div class="parallax-fallback">LAYER 3 (Small Items)</div>
-        </div>
+        </div> -->
 
         <!-- Brand Text -->
         <div class="brand-container">
