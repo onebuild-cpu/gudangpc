@@ -42,7 +42,7 @@ Options -Indexes
 </IfModule>
 
 # Prevent access to sensitive files
-<FilesMatch "\.(htaccess|htpasswd|ini|log|sh|inc|bak|sql)$">
+<FilesMatch "(^\.env|\.(htaccess|htpasswd|ini|log|sh|inc|bak|sql)$)">
     Order Allow,Deny
     Deny from all
 </FilesMatch>

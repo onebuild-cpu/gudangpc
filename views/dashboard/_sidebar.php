@@ -134,7 +134,7 @@ if (!isset($currentPage)) {
                 $settingsActive = 'active';
             }
             $canManageSettings = false;
-            if (isset($_SESSION['role']) && in_array($_SESSION['role'], ['admin', 'root'], true)) {
+            if (isset($_SESSION['role']) && $_SESSION['role'] === 'root') {
                 $canManageSettings = true;
             }
             ?>

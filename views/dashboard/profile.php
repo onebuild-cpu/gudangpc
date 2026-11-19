@@ -33,6 +33,11 @@ if ($user['role'] === 'admin') {
 } elseif ($user['role'] === 'editor') {
     $roleBadge = 'warning';
 }
+
+$roleText = '';
+if (isset($user['role'])) {
+    $roleText = htmlspecialchars(ucfirst((string) $user['role']));
+}
 ?>
 <?php require_once __DIR__ . '/../layouts/header.php'; ?>
 <?php require_once __DIR__ . '/../layouts/navbar.php'; ?>
@@ -78,7 +83,7 @@ if ($user['role'] === 'admin') {
                             <h5><?= htmlspecialchars($displayName) ?></h5>
                             <p class="text-muted small"><?= htmlspecialchars($user['phone']) ?></p>
                             <span class="badge bg-<?= $roleBadge ?>">
-                                <?= ucfirst($user['role']) ?>
+                                <?= $roleText ?>
                             </span>
                         </div>
                     </div>
@@ -180,7 +185,7 @@ if ($user['role'] === 'admin') {
                                         <th scope="row" class="col-label">Role</th>
                                         <td>
 <span class="badge bg-<?= $roleBadge ?>">
-                                                <?= ucfirst($user['role']) ?>
+                                                <?= $roleText ?>
                                             </span>
                                         </td>
                                     </tr>

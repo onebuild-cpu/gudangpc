@@ -1,8 +1,9 @@
 <?php
 
-ini_set('display_errors', '1');
-ini_set('display_startup_errors', '1');
 error_reporting(E_ALL);
+ini_set('display_errors', '0');
+ini_set('display_startup_errors', '0');
+ini_set('log_errors', '1');
 
 // Load environment variables FIRST
 require_once __DIR__ . '/../app/Core/Autoloader.php';
@@ -10,6 +11,13 @@ App\Core\Autoloader::register();
 App\Core\Autoloader::addNamespace('App', __DIR__ . '/../app');
 
 App\Core\Dotenv::load();
+
+$appEnv = App\Core\Dotenv::get('APP_ENV', 'production');
+$appEnv = (string) $appEnv;
+if ($appEnv === 'local' || $appEnv === 'development') {
+    ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
+}
 
 // Load security configuration
 $securityConfig = require __DIR__ . '/../config/security.php';

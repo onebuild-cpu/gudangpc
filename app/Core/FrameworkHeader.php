@@ -15,31 +15,35 @@ if (isset($_ENV['APP_ENV'])) {
 }
 $isProduction = ($appEnv === 'production');
 
-// Global error handler - prevent stack traces in production
-if ($isProduction) {
-    error_reporting(E_ALL & ~E_NOTICE);
-    ini_set('display_errors', '0');
-    ini_set('log_errors', '1');
-    ini_set('error_log', __DIR__ . '/../../storage/logs/php_errors.log');
-
-    set_error_handler(function ($severity, $message, $file, $line) {
-        if (!(error_reporting() & $severity)) {
-            return false;
-        }
-        error_log("PHP Error [$severity]: $message in $file:$line");
-        return true;
-    });
-
-    register_shutdown_function(function () {
-        $error = error_get_last();
-        if ($error && in_array($error['type'], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE])) {
-            error_log("Fatal Error: {$error['message']} in {$error['file']}:{$error['line']}");
-        }
-    });
-} else {
-    error_reporting(E_ALL);
+// Global error handler - hide errors by default, show them only in local/development
+error_reporting(E_ALL);
+ini_set('log_errors', '1');
+ini_set('error_log', __DIR__ . '/../../storage/logs/php_errors.log');
+if ($appEnv === 'local' || $appEnv === 'development') {
     ini_set('display_errors', '1');
+    ini_set('display_startup_errors', '1');
+} else {
+    ini_set('display_errors', '0');
+    ini_set('display_startup_errors', '0');
 }
+
+set_error_handler(function ($severity, $message, $file, $line) use ($appEnv) {
+    if (!(error_reporting() & $severity)) {
+        return false;
+    }
+    error_log("PHP Error [$severity]: $message in $file:$line");
+    if ($appEnv === 'local' || $appEnv === 'development') {
+        return false;
+    }
+    return true;
+});
+
+register_shutdown_function(function () {
+    $error = error_get_last();
+    if ($error && in_array($error['type'], [E_ERROR, E_CORE_ERROR, E_COMPILE_ERROR, E_PARSE])) {
+        error_log("Fatal Error: {$error['message']} in {$error['file']}:{$error['line']}");
+    }
+});
 
 // Session cookie hardening (before session_start)
 if (session_status() === PHP_SESSION_NONE) {
@@ -242,16 +246,9 @@ $csp = "default-src 'self'; "
      . "https://www.tiktokcdn.com; "
 
 // Media sources
-     . "media-src 'self' data: blob:; "
-
-// CSP violation reporting
-     . "report-uri /csp-report; "
-     . "report-to csp-endpoint;";
+     . "media-src 'self' data: blob:;";
 
 safe_header("Content-Security-Policy: $csp");
-
-// Report-To header for modern CSP reporting
-safe_header('Report-To: {"group":"csp-endpoint","max_age":10886400,"endpoints":[{"url":"/csp-report"}]}');
 
 // Define base URL
 $protocol = 'http';

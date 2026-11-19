@@ -16,6 +16,8 @@ if (!isset($pageTitle)) {
 if (!isset($metaDescription)) {
     $metaDescription = 'Manage products and offers';
 }
+
+$statusUrlValue = urlencode((string) $status);
 ?>
 <?php require_once __DIR__ . '/../../layouts/header.php'; ?>
 <?php require_once __DIR__ . '/../../layouts/navbar.php'; ?>
@@ -133,7 +135,7 @@ if (!isset($metaDescription)) {
                     ?>
                     <?php if (!$isDisabledPrev): ?>
                     <li class="page-item">
-                        <a class="page-link" href="<?= $base ?>/dashboard/products?page=<?= $page - 1 ?>&search=<?= urlencode($search) ?>&status=<?= $status ?>" aria-label="Previous">
+                        <a class="page-link" href="<?= $base ?>/dashboard/products?page=<?= $page - 1 ?>&search=<?= urlencode($search) ?>&status=<?= $statusUrlValue ?>" aria-label="Previous">
                             <span aria-hidden="true">«</span>
                         </a>
                     </li>
@@ -152,12 +154,12 @@ if ($isActive) {
 }
 ?>
                         <li class="page-item <?= $pageItemClass ?>">
-                            <a class="page-link" href="<?= $base ?>/dashboard/products?page=<?= $i ?>&search=<?= urlencode($search) ?>&status=<?= $status ?>"><?= $i ?></a>
+                            <a class="page-link" href="<?= $base ?>/dashboard/products?page=<?= $i ?>&search=<?= urlencode($search) ?>&status=<?= $statusUrlValue ?>"><?= $i ?></a>
                         </li>
                     <?php endfor; ?>
                     <?php if (!$isDisabledNext): ?>
                     <li class="page-item">
-                        <a class="page-link" href="<?= $base ?>/dashboard/products?page=<?= $page + 1 ?>&search=<?= urlencode($search) ?>&status=<?= $status ?>" aria-label="Next">
+                        <a class="page-link" href="<?= $base ?>/dashboard/products?page=<?= $page + 1 ?>&search=<?= urlencode($search) ?>&status=<?= $statusUrlValue ?>" aria-label="Next">
                             <span aria-hidden="true">»</span>
                         </a>
                     </li>

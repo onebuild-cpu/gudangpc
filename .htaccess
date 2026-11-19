@@ -1,0 +1,20 @@
+# Defence in depth: never serve project internals if the document root is the project folder.
+# This file is outside public/ and has no effect when the vhost serves public/.
+
+<IfModule mod_authz_core.c>
+    <FilesMatch "^\.env">
+        Require all denied
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_access_compat.c>
+    <FilesMatch "^\.env">
+        Order Allow,Deny
+        Deny from all
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_alias.c>
+    RedirectMatch 404 ^/(?:\.env.*|\.git.*|config|storage|database|docs|bin|app|views|vendor)(?:/.*)?$
+    RedirectMatch 404 ^/(?:AGENTS|TASK_PROMPTS)\.md$
+</IfModule>

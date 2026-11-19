@@ -288,7 +288,14 @@ if (isset($seo['seo_description']) && $seo['seo_description'] !== '') {
         if (isset($_SERVER['REMOTE_ADDR'])) {
             $remoteAddress = (string) $_SERVER['REMOTE_ADDR'];
         }
-        $ipHash = hash('sha256', $remoteAddress . \App\Core\Dotenv::get('APP_SALT', 'change-me'));
+        $appSalt = \App\Core\Dotenv::get('APP_SALT', '');
+        $appSalt = (string) $appSalt;
+        $ipHash = '';
+        if ($appSalt === '' || $appSalt === 'change-me') {
+            error_log('APP_SALT is not set; click IP hash skipped.');
+        } else {
+            $ipHash = hash('sha256', $remoteAddress . $appSalt);
+        }
 
         $userAgentRaw = '';
         if (isset($_SERVER['HTTP_USER_AGENT'])) {
