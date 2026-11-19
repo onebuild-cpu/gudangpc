@@ -433,10 +433,7 @@ class AdminProductController extends Controller
             if (isset($_POST['affiliate_url'])) {
                 $rawAffiliateUrl = $_POST['affiliate_url'];
             }
-            $affiliateUrl = Validator::sanitize($rawAffiliateUrl, 5000);
-            if ($affiliateUrl === '' || !Validator::url($affiliateUrl)) {
-                throw new Exception('Affiliate URL is not valid.');
-            }
+            $affiliateUrl = $this->validateAffiliateUrl($rawAffiliateUrl);
 
             $rawVendorId = '';
             if (isset($_POST['vendor_id'])) {
@@ -453,51 +450,12 @@ class AdminProductController extends Controller
                 throw new Exception('Vendor is required.');
             }
 
-            $vendor = $this->vendorModel->findById($vendorId);
-            if (!$vendor) {
-                throw new Exception('Selected vendor does not exist.');
-            }
-
-            $storeId = 0;
-            if (isset($vendor['store_id'])) {
-                $storeId = (int) $vendor['store_id'];
-            }
-            $store = $this->storeModel->findById($storeId);
-            if (!$store) {
-                throw new Exception('Selected store does not exist.');
-            }
-
-            $existingOffers = $this->offerModel->findByProductId($productId);
-            foreach ($existingOffers as $existingOffer) {
-                if ($existingOffer['vendor_id'] !== null && (int) $existingOffer['vendor_id'] === $vendorId) {
-                    throw new Exception('This vendor already has an offer for this product.');
-                }
-            }
-
             $inStock = 1;
             if (!isset($_POST['in_stock'])) {
                 $inStock = 0;
             }
 
-            try {
-                $newOfferId = $this->offerModel->insert([
-                    'product_id' => $productId,
-                    'store_id' => $storeId,
-                    'vendor_id' => $vendorId,
-                    'price_idr' => $priceIdr,
-                    'affiliate_url' => $affiliateUrl,
-                    'in_stock' => $inStock,
-                    'status' => 'published',
-                    'last_checked_at' => date('Y-m-d H:i:s'),
-                ]);
-            } catch (\PDOException $e) {
-                if ($e->getCode() === '23000') {
-                    throw new Exception('This vendor already has an offer for this product.');
-                }
-                throw $e;
-            }
-
-            $this->priceHistoryModel->record($newOfferId, $priceIdr);
+            $this->insertProductOffer($productId, $vendorId, $priceIdr, $affiliateUrl, $inStock);
             $_SESSION['success'] = 'Offer added successfully.';
         } catch (Exception $e) {
             $_SESSION['error'] = $e->getMessage();
@@ -554,21 +512,30 @@ class AdminProductController extends Controller
             if (isset($_POST['affiliate_url'])) {
                 $rawAffiliateUrl = $_POST['affiliate_url'];
             }
-            $affiliateUrl = Validator::sanitize($rawAffiliateUrl, 5000);
-            if ($affiliateUrl === '' || !Validator::url($affiliateUrl)) {
-                throw new Exception('Affiliate URL is not valid.');
-            }
+            $affiliateUrl = $this->validateAffiliateUrl($rawAffiliateUrl);
 
             $inStock = 1;
             if (!isset($_POST['in_stock'])) {
                 $inStock = 0;
             }
 
+            $status = 'published';
+            if (isset($offer['status'])) {
+                $status = (string) $offer['status'];
+            }
+            if (isset($_POST['status'])) {
+                $postedStatus = Validator::sanitize($_POST['status'], 20);
+                if (!Validator::inArray($postedStatus, ['draft', 'published'])) {
+                    throw new Exception('Invalid status.');
+                }
+                $status = $postedStatus;
+            }
+
             $this->offerModel->update($offerId, [
                 'price_idr' => $priceIdr,
                 'affiliate_url' => $affiliateUrl,
                 'in_stock' => $inStock,
-                'status' => 'published',
+                'status' => $status,
                 'last_checked_at' => date('Y-m-d H:i:s'),
             ]);
             if ((int) $offer['price_idr'] !== $priceIdr) {
@@ -628,6 +595,74 @@ class AdminProductController extends Controller
         }
 
         $this->redirect('/dashboard/products/' . $productId . '/edit');
+    }
+
+    /**
+     * Sanitize and validate a manually entered affiliate URL.
+     */
+    private function validateAffiliateUrl(string $rawAffiliateUrl): string
+    {
+        $affiliateUrl = Validator::sanitize($rawAffiliateUrl, 5000);
+        if ($affiliateUrl === '') {
+            throw new Exception('Affiliate URL is not valid.');
+        }
+        if (!Validator::url($affiliateUrl)) {
+            throw new Exception('Affiliate URL is not valid.');
+        }
+        if (preg_match('#^https?://#i', $affiliateUrl) !== 1) {
+            throw new Exception('Affiliate URL is not valid.');
+        }
+
+        return $affiliateUrl;
+    }
+
+    /**
+     * Insert one offer for a product and record its first price.
+     */
+    private function insertProductOffer(int $productId, int $vendorId, int $priceIdr, string $affiliateUrl, int $inStock): int
+    {
+        $vendor = $this->vendorModel->findById($vendorId);
+        if (!$vendor) {
+            throw new Exception('Selected vendor does not exist.');
+        }
+
+        $storeId = 0;
+        if (isset($vendor['store_id'])) {
+            $storeId = (int) $vendor['store_id'];
+        }
+        $store = $this->storeModel->findById($storeId);
+        if (!$store) {
+            throw new Exception('Selected store does not exist.');
+        }
+
+        $existingOffers = $this->offerModel->findByProductId($productId);
+        foreach ($existingOffers as $existingOffer) {
+            if ($existingOffer['vendor_id'] !== null && (int) $existingOffer['vendor_id'] === $vendorId) {
+                throw new Exception('This vendor already has an offer for this product.');
+            }
+        }
+
+        try {
+            $newOfferId = $this->offerModel->insert([
+                'product_id' => $productId,
+                'store_id' => $storeId,
+                'vendor_id' => $vendorId,
+                'price_idr' => $priceIdr,
+                'affiliate_url' => $affiliateUrl,
+                'in_stock' => $inStock,
+                'status' => 'published',
+                'last_checked_at' => date('Y-m-d H:i:s'),
+            ]);
+        } catch (\PDOException $e) {
+            if ($e->getCode() === '23000') {
+                throw new Exception('This vendor already has an offer for this product.');
+            }
+            throw $e;
+        }
+
+        $this->priceHistoryModel->record($newOfferId, $priceIdr);
+
+        return $newOfferId;
     }
 
     /**
