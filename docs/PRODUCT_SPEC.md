@@ -8,7 +8,7 @@ The worker must not create any table, route, or feature that is not listed for t
 
 ## 1. What this product is
 
-GudangPC is an Indonesian price-comparison and affiliate website for PC parts and tech gear (CPU, GPU, motherboard, RAM, SSD, PSU, case, cooler, monitor, peripherals). The UI language is English (decision D8).
+GudangPC is an Indonesian price-comparison and affiliate website for PC parts and tech gear (CPU, GPU, motherboard, RAM, SSD, PSU, case, cooler, monitor, peripherals). The dashboard is English and public pages are Indonesian (decision D8).
 
 A visitor finds a product, sees the **same product's prices across several marketplaces** (Tokopedia, Shopee, Lazada, and any other row in `stores`), and clicks through to buy. Every outbound click goes through `/go/<offer_id>`, and the owner earns affiliate commission.
 
@@ -127,11 +127,19 @@ D2 is not a change: the wishlist stays, and members still register as `pending` 
 - **Pagination:** public lists paginate at 20 per page with `?page=N`. The admin product list paginates at 20 per page.
 - **Language:** the dashboard is English; public pages are Indonesian.
 
+### Security and configuration
+
+- Errors are displayed only when `APP_ENV` is exactly `local` or `development`; otherwise they are hidden and logged to `storage/logs/php_errors.log`.
+- `APP_SALT` must be set to a long random string. If it is missing, empty or `change-me`, `/go/<offer_id>` still redirects and logs the click but stores an empty `ip_hash`.
+- The vhost `DocumentRoot` must be the `public/` folder. A root `.htaccess` exists only as a fallback that blocks project internals.
+- The CSP has no `report-uri` or `Report-To`; no `/csp-report` endpoint exists.
+- The "SEO Defaults" link and settings are root-only.
+
 ---
 
 ## 8. Data model (as built today)
 
-Existing tables and columns, as created by `database/initial_database.sql` and migrations `002` to `018`.
+Existing tables and columns. The schema is `database/migrations/dump_sql_gudangpc.sql` plus migrations 023 to 025; migration files 001 to 022 do not exist on disk.
 
 ### `users` (staff: root and admin)
 
@@ -324,14 +332,26 @@ Any code that writes to search_cache must produce valid JSON.
 | `/<category-slug>` | Category page |
 | `/<category-slug>/<product-slug>` | Product detail page |
 | `/search?q=` | Search results |
+| `/search/<slug>` | Structured search result page |
 | `/go/<offer_id>` | Logs the click, then 302 redirects to the offer's affiliate URL |
 | `/register` | Member registration form (GET) and `/register/submit` (POST) |
+| `/verify-email/<token>` | Email verification link |
 | `/login` | Sign-in form (GET) and `/login/submit` (POST); `/logout` (POST) |
+| `/auth/google/redirect` | Start Google sign-in |
+| `/auth/google/callback` | Google sign-in callback |
+| `/auth/facebook/redirect` | Start Facebook sign-in |
+| `/auth/facebook/callback` | Facebook sign-in callback |
 | `/member` | Member Area |
 | `/member/profile` | Own member profile |
 | `/wishlist/add/<id>` | Add a product to the wishlist (member only) |
 | `/wishlist/remove/<id>` | Remove a product from the wishlist (member only) |
 | `/sitemap.xml` | XML sitemap |
+| `/about` | About page |
+| `/how-it-works` | How it works page |
+| `/contact` | Contact page |
+| `/privacy` | Privacy policy |
+| `/terms` | Terms of service |
+| `/disclosure` | Affiliate disclosure |
 
 ### Dashboard (login required; admin or root)
 
@@ -340,16 +360,24 @@ Any code that writes to search_cache must produce valid JSON.
 | `/dashboard` | Overview |
 | `/dashboard/profile` | Own staff profile |
 | `/dashboard/admins[...]` | Staff accounts (root only) |
+| `/dashboard/admins/<id>/verify` | Mark a staff account verified (root only) |
+| `/dashboard/admins/<id>/unverify` | Remove staff verification (root only) |
 | `/dashboard/members` | Members; `/activate` and `/ban` actions (root only) |
 | `/dashboard/categories[...]` | Categories |
 | `/dashboard/brands[...]` | Brands |
 | `/dashboard/stores[...]` | Marketplaces |
 | `/dashboard/vendors[...]` | Sellers |
 | `/dashboard/locations[...]` | Locations |
-| `/dashboard/products[...]` | Products; offers can be added, edited and deleted inside the product edit page; the product create page accepts an optional first offer |
+| `/dashboard/products[...]` | Products; the product edit page contains the offer forms, which post to separate offer routes for add, update and delete; the product create page accepts an optional first offer |
+| `/dashboard/products/<id>/offer/store` | Add an offer from the product edit form |
+| `/dashboard/products/<id>/offer/<offer_id>/update` | Update an offer from the product edit form |
+| `/dashboard/products/<id>/offer/<offer_id>/delete` | Delete an offer from the product edit form |
 | `/dashboard/products/import` | CSV import form; `/store` handles the upload |
 | `/dashboard/settings` | Settings |
+| `/dashboard/settings/update` | Save SEO defaults (root only) |
 | `/dashboard/clicks` | Click analytics |
+| `/dashboard/search` | Search analytics |
+| `/dashboard/search/<id>/toggle` | Toggle a search query's sitemap inclusion |
 
 `[...]` means the standard CRUD pattern from `AGENTS.md`: list, `create`, `store`, `(<id>)/edit`, `(<id>)/update`, `(<id>)/delete`.
 
