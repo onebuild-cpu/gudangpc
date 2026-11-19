@@ -89,6 +89,17 @@
             </div>
             <?php endforeach; ?>
 
+            <?php foreach ($locationSections as $locationSection): ?>
+            <div class="mb-5">
+                <h2 class="section-title fw-bold mb-4">Toko di <?= htmlspecialchars((string) $locationSection['location_name']) ?></h2>
+                <div class="row g-4">
+                    <?php foreach ($locationSection['sellers'] as $seller): ?>
+                    <?php include __DIR__ . '/../public/_seller_card.php'; ?>
+                    <?php endforeach; ?>
+                </div>
+            </div>
+            <?php endforeach; ?>
+
             <?php if (!empty($brands)): ?>
             <div class="mb-5">
                 <h2 class="section-title fw-bold mb-4">Merek</h2>
