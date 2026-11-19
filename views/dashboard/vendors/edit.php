@@ -35,6 +35,16 @@ $ratingValue = '';
 if (isset($old['rating'])) {
     $ratingValue = $old['rating'];
 }
+
+$locationIdValue = '';
+if (isset($old['location_id'])) {
+    $locationIdValue = $old['location_id'];
+}
+
+$descriptionValue = '';
+if (isset($old['description'])) {
+    $descriptionValue = $old['description'];
+}
 ?>
 <?php require_once __DIR__ . '/../../layouts/header.php'; ?>
 <?php require_once __DIR__ . '/../../layouts/navbar.php'; ?>
@@ -85,6 +95,25 @@ if (isset($old['rating'])) {
                         </div>
 
                         <div class="mb-3">
+                            <label for="location_id" class="form-label">Location</label>
+                            <select class="form-select" id="location_id" name="location_id">
+                                <option value="">No location</option>
+                                <?php foreach ($locations as $location): ?>
+                                    <?php
+                                    $locationOptionSelected = '';
+                                    if ($locationIdValue !== '' && $locationIdValue == (int) $location['id']) {
+                                        $locationOptionSelected = 'selected';
+                                    }
+                                    ?>
+                                    <option value="<?= (int) $location['id'] ?>" <?= $locationOptionSelected ?>>
+                                        <?= htmlspecialchars((string) $location['name']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                            <div class="form-text">Optional. Manage the list under Locations.</div>
+                        </div>
+
+                        <div class="mb-3">
                             <label for="name" class="form-label">Vendor Name</label>
                             <input type="text" class="form-control" id="name" name="name" value="<?= htmlspecialchars((string) $nameValue) ?>" maxlength="255" required>
                             <div class="form-text">Required. Maximum 255 characters.</div>
@@ -100,6 +129,12 @@ if (isset($old['rating'])) {
                             <label for="rating" class="form-label">Rating</label>
                             <input type="number" class="form-control" id="rating" name="rating" value="<?= htmlspecialchars((string) $ratingValue) ?>" step="0.01" min="0" max="5" placeholder="Rating (0-5)">
                             <div class="form-text">Optional. Between 0 and 5.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="description" class="form-label">Description</label>
+                            <textarea class="form-control" id="description" name="description" rows="4"><?= htmlspecialchars((string) $descriptionValue) ?></textarea>
+                            <div class="form-text">Optional. Maximum 1000 characters of text. Shown on the seller page.</div>
                         </div>
 
                         <div class="mt-3">

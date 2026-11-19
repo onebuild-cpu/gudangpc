@@ -8,6 +8,7 @@ use App\Core\Validator;
 use App\Models\OfferModel;
 use App\Models\VendorModel;
 use App\Models\StoreModel;
+use App\Models\LocationModel;
 use Exception;
 
 /**
@@ -17,16 +18,18 @@ class AdminVendorController extends Controller
 {
     private VendorModel $vendorModel;
     private StoreModel $storeModel;
+    private LocationModel $locationModel;
     private OfferModel $offerModel;
 
     /**
-     * Inject the database connection and build the vendor and store models.
+     * Inject the database connection and build the required models.
      */
     public function __construct(PDO $pdo)
     {
         parent::__construct($pdo);
         $this->vendorModel = new VendorModel($pdo);
         $this->storeModel = new StoreModel($pdo);
+        $this->locationModel = new LocationModel($pdo);
         $this->offerModel = new OfferModel($pdo);
     }
 
@@ -55,12 +58,14 @@ class AdminVendorController extends Controller
         $this->requireAdmin();
 
         $stores = $this->storeModel->findAll('name ASC');
+        $locations = $this->locationModel->findAll('name ASC');
 
         $this->view('dashboard/vendors/create', [
             'pageTitle' => 'Create Vendor',
             'metaDescription' => 'Create a new marketplace vendor',
             'currentPage' => 'vendors',
             'stores' => $stores,
+            'locations' => $locations,
             'error' => '',
             'old' => $this->emptyFormData(),
         ]);
@@ -88,12 +93,14 @@ class AdminVendorController extends Controller
             $this->redirect('/dashboard/vendors');
         } catch (Exception $e) {
             $stores = $this->storeModel->findAll('name ASC');
+            $locations = $this->locationModel->findAll('name ASC');
 
             $this->view('dashboard/vendors/create', [
                 'pageTitle' => 'Create Vendor',
                 'metaDescription' => 'Create a new marketplace vendor',
                 'currentPage' => 'vendors',
                 'stores' => $stores,
+                'locations' => $locations,
                 'error' => $e->getMessage(),
                 'old' => $this->collectOldInput($this->emptyFormData()),
             ]);
@@ -117,6 +124,7 @@ class AdminVendorController extends Controller
         }
 
         $stores = $this->storeModel->findAll('name ASC');
+        $locations = $this->locationModel->findAll('name ASC');
 
         $this->view('dashboard/vendors/edit', [
             'pageTitle' => 'Edit Vendor',
@@ -124,6 +132,7 @@ class AdminVendorController extends Controller
             'currentPage' => 'vendors',
             'vendor' => $vendor,
             'stores' => $stores,
+            'locations' => $locations,
             'error' => '',
             'old' => $this->formDataForVendor($vendor),
         ]);
@@ -172,12 +181,14 @@ class AdminVendorController extends Controller
             $this->redirect('/dashboard/vendors');
         } catch (Exception $e) {
             $stores = $this->storeModel->findAll('name ASC');
+            $locations = $this->locationModel->findAll('name ASC');
             $this->view('dashboard/vendors/edit', [
                 'pageTitle' => 'Edit Vendor',
                 'metaDescription' => 'Edit a marketplace vendor',
                 'currentPage' => 'vendors',
                 'vendor' => $vendor,
                 'stores' => $stores,
+                'locations' => $locations,
                 'error' => $e->getMessage(),
                 'old' => $this->collectOldInput($this->formDataForVendor($vendor)),
             ]);
@@ -241,6 +252,22 @@ class AdminVendorController extends Controller
             throw new Exception('Selected store does not exist.');
         }
 
+        $rawLocationId = '';
+        if (isset($_POST['location_id'])) {
+            $rawLocationId = $_POST['location_id'];
+        }
+        $locationId = null;
+        if ($rawLocationId !== '') {
+            if (!Validator::integer($rawLocationId, 1)) {
+                throw new Exception('Invalid location.');
+            }
+            $locationId = (int) $rawLocationId;
+            $location = $this->locationModel->findById($locationId);
+            if (!$location) {
+                throw new Exception('Selected location does not exist.');
+            }
+        }
+
         $rawName = '';
         if (isset($_POST['name'])) {
             $rawName = $_POST['name'];
@@ -267,6 +294,19 @@ class AdminVendorController extends Controller
             throw new Exception('Slug is already in use.');
         }
 
+        $rawDescription = '';
+        if (isset($_POST['description']) && is_string($_POST['description'])) {
+            $rawDescription = $_POST['description'];
+        }
+        $description = null;
+        if ($rawDescription !== '') {
+            $measuredDescription = Validator::sanitize($rawDescription, 100000);
+            if (mb_strlen($measuredDescription, 'UTF-8') > 1000) {
+                throw new Exception('Description must be at most 1000 characters.');
+            }
+            $description = Validator::sanitize($rawDescription, 1000);
+        }
+
         $rawRating = '';
         if (isset($_POST['rating'])) {
             $rawRating = $_POST['rating'];
@@ -284,8 +324,10 @@ class AdminVendorController extends Controller
 
         return [
             'store_id' => $storeId,
+            'location_id' => $locationId,
             'name' => $name,
             'slug' => $slug,
+            'description' => $description,
             'rating' => $rating,
         ];
     }
@@ -309,8 +351,10 @@ class AdminVendorController extends Controller
     {
         return [
             'store_id' => '',
+            'location_id' => '',
             'name' => '',
             'slug' => '',
+            'description' => '',
             'rating' => '',
         ];
     }
@@ -325,11 +369,17 @@ class AdminVendorController extends Controller
         if (isset($_POST['store_id'])) {
             $old['store_id'] = $_POST['store_id'];
         }
+        if (isset($_POST['location_id'])) {
+            $old['location_id'] = $_POST['location_id'];
+        }
         if (isset($_POST['name'])) {
             $old['name'] = $_POST['name'];
         }
         if (isset($_POST['slug'])) {
             $old['slug'] = $_POST['slug'];
+        }
+        if (isset($_POST['description']) && is_string($_POST['description'])) {
+            $old['description'] = $_POST['description'];
         }
         if (isset($_POST['rating'])) {
             $old['rating'] = $_POST['rating'];
@@ -345,19 +395,27 @@ class AdminVendorController extends Controller
     {
         $old = [
             'store_id' => '',
+            'location_id' => '',
             'name' => '',
             'slug' => '',
+            'description' => '',
             'rating' => '',
         ];
 
         if (isset($vendor['store_id'])) {
             $old['store_id'] = $vendor['store_id'];
         }
+        if (isset($vendor['location_id'])) {
+            $old['location_id'] = $vendor['location_id'];
+        }
         if (isset($vendor['name'])) {
             $old['name'] = $vendor['name'];
         }
         if (isset($vendor['slug'])) {
             $old['slug'] = $vendor['slug'];
+        }
+        if (isset($vendor['description'])) {
+            $old['description'] = $vendor['description'];
         }
         if (isset($vendor['rating'])) {
             $old['rating'] = $vendor['rating'];

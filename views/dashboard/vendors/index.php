@@ -42,6 +42,7 @@ if (!isset($metaDescription)) {
                             <th scope="col">ID</th>
                             <th scope="col">Vendor Name</th>
                             <th scope="col">Platform</th>
+                            <th scope="col">Location</th>
                             <th scope="col">Rating</th>
                             <th scope="col">Status</th>
                             <th scope="col" class="text-end">Actions</th>
@@ -50,7 +51,7 @@ if (!isset($metaDescription)) {
                     <tbody>
                     <?php if (empty($vendors)): ?>
                         <tr>
-                            <td colspan="6" class="text-center text-muted">No vendors found.</td>
+                            <td colspan="7" class="text-center text-muted">No vendors found.</td>
                         </tr>
                     <?php else: ?>
                         <?php foreach ($vendors as $vendor): ?>
@@ -65,6 +66,11 @@ if (!isset($metaDescription)) {
                                 $storeNameValue = (string) $vendor['store_name'];
                             }
 
+                            $locationNameValue = '';
+                            if (isset($vendor['location_name'])) {
+                                $locationNameValue = (string) $vendor['location_name'];
+                            }
+
                             $ratingValue = '';
                             if (isset($vendor['rating'])) {
                                 $ratingValue = (string) $vendor['rating'];
@@ -76,6 +82,13 @@ if (!isset($metaDescription)) {
                             <td>
                                 <?php if ($storeNameValue !== ''): ?>
                                     <?= htmlspecialchars((string) $storeNameValue) ?>
+                                <?php else: ?>
+                                    <span class="text-muted">-</span>
+                                <?php endif; ?>
+                            </td>
+                            <td>
+                                <?php if ($locationNameValue !== ''): ?>
+                                    <?= htmlspecialchars((string) $locationNameValue) ?>
                                 <?php else: ?>
                                     <span class="text-muted">-</span>
                                 <?php endif; ?>

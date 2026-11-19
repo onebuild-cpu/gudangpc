@@ -11,13 +11,14 @@ class VendorModel extends Model
     protected string $table = 'vendors';
 
     /**
-     * Return all vendors with their store (platform) names.
+     * Return all vendors with their store (platform) and location names.
      */
     public function findAllWithStore(): array
     {
-        $sql = "SELECT v.*, s.name AS store_name
+        $sql = "SELECT v.*, s.name AS store_name, l.name AS location_name
                 FROM {$this->table} v
                 LEFT JOIN stores s ON s.id = v.store_id
+                LEFT JOIN locations l ON l.id = v.location_id
                 ORDER BY v.id DESC";
 
         return $this->query($sql);
