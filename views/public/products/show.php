@@ -214,6 +214,11 @@ if ($inWishlistValue) {
                                         $sellerValue = 'General';
                                     }
 
+                                    $sellerLocationText = '';
+                                    if (isset($offer['vendor_location_name']) && $offer['vendor_location_name'] !== null && $offer['vendor_location_name'] !== '') {
+                                        $sellerLocationText = htmlspecialchars((string) $offer['vendor_location_name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                                    }
+
                                     $sellerTitleValue = '';
                                     if (isset($offer['seller_title']) && $offer['seller_title'] !== null) {
                                         $sellerTitleValue = (string) $offer['seller_title'];
@@ -250,7 +255,12 @@ if ($inWishlistValue) {
                                     ?>
                                     <tr>
                                         <td><?= htmlspecialchars($marketplaceValue) ?></td>
-                                        <td><?= htmlspecialchars($sellerValue) ?></td>
+                                        <td>
+                                            <?= htmlspecialchars($sellerValue) ?>
+                                            <?php if ($sellerLocationText !== ''): ?>
+                                                <div class="text-muted small"><i class="bi bi-geo-alt"></i> <?= $sellerLocationText ?></div>
+                                            <?php endif; ?>
+                                        </td>
                                         <td>
                                             <div class="offer-title"><?= htmlspecialchars($sellerTitleValue) ?></div>
                                         </td>
@@ -327,6 +337,11 @@ if ($inWishlistValue) {
                                                 $sellerValue = 'General';
                                             }
 
+                                            $sellerLocationText = '';
+                                            if (isset($offer['vendor_location_name']) && $offer['vendor_location_name'] !== null && $offer['vendor_location_name'] !== '') {
+                                                $sellerLocationText = htmlspecialchars((string) $offer['vendor_location_name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                                            }
+
                                             $sellerTitleValue = '';
                                             if (isset($offer['seller_title']) && $offer['seller_title'] !== null) {
                                                 $sellerTitleValue = (string) $offer['seller_title'];
@@ -363,7 +378,12 @@ if ($inWishlistValue) {
                                             ?>
                                             <tr>
                                                 <td><?= htmlspecialchars($marketplaceValue) ?></td>
-                                                <td><?= htmlspecialchars($sellerValue) ?></td>
+                                                <td>
+                                                    <?= htmlspecialchars($sellerValue) ?>
+                                                    <?php if ($sellerLocationText !== ''): ?>
+                                                        <div class="text-muted small"><i class="bi bi-geo-alt"></i> <?= $sellerLocationText ?></div>
+                                                    <?php endif; ?>
+                                                </td>
                                                 <td>
                                                     <div class="offer-title"><?= htmlspecialchars($sellerTitleValue) ?></div>
                                                 </td>
