@@ -211,6 +211,7 @@ if ($robotsTagValue === 'noindex, follow') {
                                             </option>
                                         <?php endforeach; ?>
                                     </select>
+                                    <div class="form-text">Required.</div>
                                 </div>
 
                                 <div class="mb-3">
@@ -239,6 +240,7 @@ if ($robotsTagValue === 'noindex, follow') {
                                 <div class="mb-3">
                                     <label for="short_description" class="form-label">Short Description</label>
                                     <textarea class="form-control summernote" id="short_description" name="short_description" rows="3"><?= htmlspecialchars((string) $shortDescriptionValue) ?></textarea>
+                                    <div class="form-text">Maximum 500 characters, including formatting.</div>
                                 </div>
 
                                 <div class="mb-3">
