@@ -189,13 +189,13 @@ PRIMARY KEY (id), UNIQUE (slug), UNIQUE (name)
 
 ```
 id, store_id, location_id, name, slug, rating, store_rating, status,
-description, created_at, updated_at
+description, image, created_at, updated_at
 PRIMARY KEY (id), UNIQUE (slug), KEY (store_id), KEY (location_id)
 FOREIGN KEY (store_id) REFERENCES stores (id)
 FOREIGN KEY (location_id) REFERENCES locations (id) ON DELETE RESTRICT
 ```
 
-`status` default is `active`. `rating` and `store_rating` are decimal ratings carried from marketplace data; the importer updates `store_rating` from the scrape. `description` is plain text, up to 1000 characters.
+`status` default is `active`. `rating` and `store_rating` are decimal ratings carried from marketplace data; the importer updates `store_rating` from the scrape. `description` is plain text, up to 1000 characters. `image` `varchar(255)` NULL was added by migration 025 and is written only by `bin/create_vendor_placeholder.php`; the vendor forms, seller page and seller card do not use it yet.
 
 ### `products`
 
@@ -291,14 +291,14 @@ AdminSearchController reads it and toggles is_indexed for sitemap inclusion.
 - unique key `(store_id, external_id)` on `offers` (NULL `external_id` rows may repeat);
 - `stores.affiliate_url_template` `varchar(500)` NULL.
 
-The authoritative schema is `database/migrations/dump_sql_gudangpc.sql` plus migrations 023 and 024; the dump itself was exported before them. `initial_database.sql` does not contain the catalog tables.
+The authoritative schema is `database/migrations/dump_sql_gudangpc.sql` plus migrations 023, 024 and 025; the dump itself was exported before them. `initial_database.sql` does not contain the catalog tables.
 
 **Migration 022** is applied. The `price_history` table, its index `idx_price_history_offer_recorded` and its foreign key to `offers` (`ON DELETE CASCADE`) exist in the current dump:
 
 - `price_history`: `id`, `offer_id` (`ON DELETE CASCADE`), `price_idr bigint unsigned`, `recorded_at datetime`;
 - index on `(offer_id, recorded_at)`; no `created_at` / `updated_at`.
 
-**Migrations 023 and 024** are applied. Migration 023 creates the `locations` table (`database/migrations/023_locations.sql`); migration 024 adds `vendors.location_id` (FK to `locations.id`, `ON DELETE RESTRICT`) and `vendors.description` `varchar(1000)` NULL (`database/migrations/024_vendor_location_description.sql`). The old plan for a `vendor_stores` join table was not built and remains parked.
+**Migrations 023, 024 and 025** are applied. Migration 023 creates the `locations` table (`database/migrations/023_locations.sql`); migration 024 adds `vendors.location_id` (FK to `locations.id`, `ON DELETE RESTRICT`) and `vendors.description` `varchar(1000)` NULL (`database/migrations/024_vendor_location_description.sql`); migration 025 adds `vendors.image` `varchar(255)` NULL (`database/migrations/025_vendors_image.sql`). The old plan for a `vendor_stores` join table was not built and remains parked.
 
 ### Not in the database
 
@@ -318,6 +318,7 @@ Any code that writes to search_cache must produce valid JSON.
 | `/` | Homepage |
 | `/categories` | Category list |
 | `/brands` | Brand list |
+| `/locations` | Store locations: sellers grouped by location |
 | `/brand/<slug>` | Brand page |
 | `/seller/<slug>` | Active seller page |
 | `/<category-slug>` | Category page |
@@ -359,6 +360,10 @@ The seller page at `/seller/<slug>` is available only for active vendors. It sho
 The homepage has "Toko di <location>" sections after the per-category sections and before "Merek": at most 4 locations (most eligible sellers first, then name), each with at most 4 seller cards (most eligible products first, then name). An eligible seller is active, has a location and has at least one published product with an active offer from that seller; sellers without a location do not appear.
 
 On the product page the seller name in both Compare Prices tables links to `/seller/<slug>` when a vendor exists, and the seller's location is printed under the name when set.
+
+Maintenance scripts in `bin/` create placeholder WebP images for categories (`create_category_placeholder.php [slug]`), stores (`create_store_placeholder.php [slug]`) and vendors (`create_vendor_placeholder.php [slug]`), while `fill_product_images_from_categories.php` copies a category image into imageless products. They write files under `public/uploads/<categories|stores|vendors>/` and set the image column only when it is empty; they never overwrite. They are one-time database updates, not runtime fallbacks, and require PHP GD with WebP support and `public/assets/fonts/Poppins-Bold.ttf`. Usage details are in `docs/CATEGORY_PLACEHOLDER_HOWTO.md`.
+
+`/locations` lists locations that have at least one eligible seller, ordered by seller count descending then location name; each section has a "(N Toko)" heading and cards for all its eligible sellers, with no pagination. The page uses two queries, is linked from the navbar as "Lokasi Toko", is not in the sitemap and has no `seo_meta`; "locations" is a reserved slug.
 
 ---
 

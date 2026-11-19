@@ -137,4 +137,49 @@ class VendorModel extends Model
 
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Return all locations that have sellers with active offers.
+     */
+    public function findLocationsWithSellerCounts(): array
+    {
+        $activeCondition = OfferModel::activeCondition();
+        $sql = "SELECT l.id, l.name, l.slug, COUNT(DISTINCT v.id) AS seller_count
+                FROM locations l
+                INNER JOIN vendors v ON v.location_id = l.id AND v.status = 'active'
+                WHERE EXISTS (
+                    SELECT 1 FROM products p
+                    INNER JOIN offers o ON o.product_id = p.id
+                    INNER JOIN stores s ON s.id = o.store_id
+                    WHERE p.status = 'published' AND o.vendor_id = v.id AND " . $activeCondition . "
+                )
+                GROUP BY l.id, l.name, l.slug
+                ORDER BY seller_count DESC, l.name ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Return all sellers with a location and an active offer.
+     */
+    public function findEligibleSellersWithLocation(): array
+    {
+        $activeCondition = OfferModel::activeCondition();
+        $sql = "SELECT v.id, v.name, v.slug, v.location_id, s.name AS store_name, v.rating, v.store_rating,
+                    (SELECT COUNT(DISTINCT p.id) FROM products p
+                        INNER JOIN offers o ON o.product_id = p.id
+                        INNER JOIN stores s ON s.id = o.store_id
+                        WHERE p.status = 'published' AND o.vendor_id = v.id AND " . $activeCondition . ") AS product_count
+                FROM {$this->table} v
+                INNER JOIN stores s ON s.id = v.store_id
+                WHERE v.status = 'active' AND v.location_id IS NOT NULL
+                HAVING product_count > 0
+                ORDER BY product_count DESC, v.name ASC";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+
+        return $stmt->fetchAll(\PDO::FETCH_ASSOC);
+    }
 }

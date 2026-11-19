@@ -73,6 +73,11 @@ if (stripos($requestUri, 'brands') === 0) {
     $brandsActive = 'active';
 }
 
+$locationsActive = '';
+if (stripos($requestUri, 'locations') === 0) {
+    $locationsActive = 'active';
+}
+
 $profileHref = '/dashboard/profile';
 if ($isVisitor) {
     $profileHref = '/member/profile';
@@ -130,6 +135,9 @@ if ($isVisitor) {
                 </li>
                 <li class="nav-item">
                     <a class="nav-link <?= $brandsActive ?>" href="<?= $base ?>/brands">Merek</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link <?= $locationsActive ?>" href="<?= $base ?>/locations">Lokasi Toko</a>
                 </li>
                 <?php /* Commented out because registration can only be done by root/admin
                 <?php if (!isset($_SESSION['user_id']) || $_SESSION['user_id'] == 0): ?>

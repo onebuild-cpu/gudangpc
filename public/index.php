@@ -85,6 +85,7 @@ $router->addRoute('search/([a-z0-9-]+)', 'PublicSearchController', 'show');
 // Public catalog routes
 $router->addRoute('categories', 'PublicCategoryController', 'index');
 $router->addRoute('brands', 'PublicBrandController', 'index');
+$router->addRoute('locations', 'PublicLocationController', 'index');
 $router->addRoute('brand/([a-z0-9-]+)', 'PublicBrandController', 'show');
 $router->addRoute('seller/([a-z0-9-]+)', 'PublicVendorController', 'show');
 $router->addRoute('go/(\d+)', 'PublicProductController', 'go');
