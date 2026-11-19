@@ -118,12 +118,12 @@ D2 is not a change: the wishlist stays, and members still register as `pending` 
 - **Money:** Rupiah stored as an unsigned integer in `price_idr`. No decimals, no floats. Display with `number_format($price, 0, ',', '.')` and the prefix `Rp `.
 - **Slugs:** lowercase `a-z`, `0-9` and `-`; unique per table; created from the name; not changed automatically on rename.
 - **Charset:** `utf8mb4`, collation `utf8mb4_unicode_ci`, engine InnoDB, except the legacy `users` table which is `utf8mb4_general_ci` in `initial_database.sql`.
-- **Timestamps:** every table has `created_at` and `updated_at`, except `offer_clicks` (only `clicked_at`), `wishlists` and `search_cache` (only `created_at`), and the planned `price_history` (only `recorded_at`).
-- **Affiliate links:** public pages never print an affiliate URL directly. They link to `/go/<offer_id>`. Outbound links use `target="_blank"` and `rel="sponsored nofollow noopener"`. Pages with offers show the disclosure line: "We may earn a commission from purchases made through our links."
+- **Timestamps:** every table has `created_at` and `updated_at`, except `offer_clicks` (only `clicked_at`), `wishlists` and `search_cache` (only `created_at`), and the `price_history` (only `recorded_at`).
+- **Affiliate links:** public pages never print an affiliate URL directly. They link to `/go/<offer_id>`. Outbound links use `target="_blank"` and `rel="sponsored nofollow noopener"`. Pages with offers show the disclosure line: "We may earn a commission from purchases made through our links." Manual entry accepts only `http://` and `https://` URLs, the same as CSV import. Offers have status `draft` or `published`, editable in the offer edit form.
 - **Offer visibility:** only active offers (section 5) are shown publicly.
 - **Output safety:** all dynamic output is escaped. Rich descriptions are printed only after `\App\Core\RichText::clean()`.
 - **Deleting content:** a category cannot be deleted while products reference it. A marketplace cannot be deleted while offers or sellers reference it. A brand is not blocked; products pointing at it get `brand_id = NULL`. Products and offers are hard-deleted from the dashboard after a confirm. An offer that already has click history must not be deleted; set it to Draft or Out of stock instead (task A4).
-- **Pagination:** public lists paginate at 20 per page with `?page=N` (planned in C4). The admin product list paginates at 20 per page (planned in E2).
+- **Pagination:** public lists paginate at 20 per page with `?page=N` (planned in C4). The admin product list paginates at 20 per page.
 
 ---
 
@@ -195,6 +195,8 @@ PRIMARY KEY (id), UNIQUE (slug), KEY (category_id), KEY (brand_id)
 FOREIGN KEY (category_id) REFERENCES categories (id)
 FOREIGN KEY (brand_id) REFERENCES brands (id) ON DELETE SET NULL
 ```
+
+`short_description` is plain text: formatting tags are stripped on save and the limit is 500 characters of text. `description` is rich text, keeps formatting, and is printed only after `\App\Core\RichText::clean()`.
 
 ### `offers`
 
@@ -279,7 +281,7 @@ AdminSearchController reads it and toggles is_indexed for sitemap inclusion.
 
 `dump_sql_gudangpc.sql` is currently the authoritative full schema; `initial_database.sql` does not contain the catalog tables.
 
-**Migration 022** adds price history:
+**Migration 022** is applied. The `price_history` table, its index `idx_price_history_offer_recorded` and its foreign key to `offers` (`ON DELETE CASCADE`) exist in the current dump:
 
 - `price_history`: `id`, `offer_id` (`ON DELETE CASCADE`), `price_idr bigint unsigned`, `recorded_at datetime`;
 - index on `(offer_id, recorded_at)`; no `created_at` / `updated_at`.
@@ -313,7 +315,7 @@ Any code that writes to search_cache must produce valid JSON.
 | `/member/profile` | Own member profile |
 | `/wishlist/add/<id>` | Add a product to the wishlist (member only) |
 | `/wishlist/remove/<id>` | Remove a product from the wishlist (member only) |
-| `/sitemap.xml` | XML sitemap (planned, task A6) |
+| `/sitemap.xml` | XML sitemap |
 
 ### Dashboard (login required; admin or root)
 
@@ -327,12 +329,14 @@ Any code that writes to search_cache must produce valid JSON.
 | `/dashboard/brands[...]` | Brands |
 | `/dashboard/stores[...]` | Marketplaces |
 | `/dashboard/vendors[...]` | Sellers |
-| `/dashboard/products[...]` | Products, plus offer add/delete inside the product edit page (offer edit planned, task A4) |
+| `/dashboard/products[...]` | Products; offers can be added, edited and deleted inside the product edit page; the product create page accepts an optional first offer |
 | `/dashboard/products/import` | CSV import form; `/store` handles the upload |
 | `/dashboard/settings` | Settings |
-| `/dashboard/clicks` | Click analytics (planned, task E1) |
+| `/dashboard/clicks` | Click analytics |
 
 `[...]` means the standard CRUD pattern from `AGENTS.md`: list, `create`, `store`, `(<id>)/edit`, `(<id>)/update`, `(<id>)/delete`.
+
+Staff can enter the first offer while creating a product via the optional "First offer" block (vendor, price, affiliate URL, in stock). If the block is empty no offer is created. If the product is created but the offer fails, the product stays and staff land on the edit page with an error.
 
 ---
 
