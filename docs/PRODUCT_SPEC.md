@@ -27,7 +27,7 @@ There is **no marketplace API integration yet** and no server-side scraping. The
 
 ### Not what this is
 
-Not a shop: no cart, checkout, payments, stock management, or first-party reviews. No email is sent by the application. There are no public marketplace or seller pages (decision D5).
+Not a shop: no cart, checkout, payments, stock management, or first-party reviews. No email is sent by the application. Sellers have public pages at `/seller/<slug>`; marketplaces do not (decision D5).
 
 ---
 
@@ -37,6 +37,7 @@ Not a shop: no cart, checkout, payments, stock management, or first-party review
 |---|---|
 | **Marketplace** | A row in `stores` (Tokopedia, Shopee, Lazada, ...). The word "store" in table and class names means marketplace. |
 | **Seller** | A row in `vendors`. Every seller belongs to exactly one marketplace (`vendors.store_id`). |
+| **Location** | A row in `locations`; a city or area where sellers are based. |
 | **Offer** (listing) | One seller's price for one product on one marketplace. One row in `offers`. |
 | **Member** | A public user account, stored in `members`. Not a staff account. |
 
@@ -102,10 +103,10 @@ Public price tables, price badges, the homepage, the sitemap and structured data
 |---|---|
 | D1 | **The compare feature is removed**: its route, UI, controller and view. Parked until per-category specs exist. |
 | D4 | A product with **no active offer** is shown dimmed on category, brand and search pages, hidden on the homepage, left out of `sitemap.xml`, and has no price in structured data. |
-| D5 | **No public pages for marketplaces or sellers** for now. Their SEO fields stay in the dashboard but nothing renders them publicly. |
+| D5 | Marketplaces still have no public pages. Sellers now have public pages at `/seller/<slug>`. Marketplace and seller SEO records are still not rendered publicly; seller pages build their title and description from the seller's name and description. |
 | D6 | The unique rule `(product_id, vendor_id)` on `offers` stays. A second listing from the same seller for the same product is **reported**, not merged. |
 | D7 | Affiliate links are built from a per-marketplace **template** (`stores.affiliate_url_template`) applied to the raw product URL. If no template exists, the raw URL is used and the import report warns. |
-| D8 | UI language stays **English**. Indonesian UI is parked. |
+| D8 | The dashboard language is English; public pages are Indonesian. |
 | D9 | The canonical URL is **computed at render time** from `APP_URL`. A stored `seo_meta.canonical_url` is honoured only if it is absolute (starts with `http`). |
 | D10 | Google sign-ins verify and clear OAuth state, verify TLS with a 10-second timeout, require a verified email, create new members as `active`, and activate a pending email member with a random password. |
 
@@ -122,8 +123,9 @@ D2 is not a change: the wishlist stays, and members still register as `pending` 
 - **Affiliate links:** public pages never print an affiliate URL directly. They link to `/go/<offer_id>`. Outbound links use `target="_blank"` and `rel="sponsored nofollow noopener"`. Pages with offers show the disclosure line: "We may earn a commission from purchases made through our links." Manual entry accepts only `http://` and `https://` URLs, the same as CSV import. Offers have status `draft` or `published`, editable in the offer edit form.
 - **Offer visibility:** only active offers (section 5) are shown publicly.
 - **Output safety:** all dynamic output is escaped. Rich descriptions are printed only after `\App\Core\RichText::clean()`.
-- **Deleting content:** a category cannot be deleted while products reference it. A marketplace cannot be deleted while offers or sellers reference it. A brand is not blocked; products pointing at it get `brand_id = NULL`. Products and offers are hard-deleted from the dashboard after a confirm. An offer that already has click history must not be deleted; set it to Draft or Out of stock instead (task A4).
-- **Pagination:** public lists paginate at 20 per page with `?page=N` (planned in C4). The admin product list paginates at 20 per page.
+- **Deleting content:** a category cannot be deleted while products reference it. A marketplace cannot be deleted while offers or sellers reference it. A brand is not blocked; products pointing at it get `brand_id = NULL`. A location cannot be deleted while sellers reference it. Products and offers are hard-deleted from the dashboard after a confirm. An offer that already has click history must not be deleted; set it to Draft or Out of stock instead (task A4).
+- **Pagination:** public lists paginate at 20 per page with `?page=N`. The admin product list paginates at 20 per page.
+- **Language:** the dashboard is English; public pages are Indonesian.
 
 ---
 
@@ -174,16 +176,26 @@ created_by, updated_by, created_at, updated_at
 PRIMARY KEY (id), UNIQUE (slug)
 ```
 
+### `locations`
+
+```
+id, name, slug, created_at, updated_at
+PRIMARY KEY (id), UNIQUE (slug), UNIQUE (name)
+```
+
+`locations` has no `status` column.
+
 ### `vendors` (sellers)
 
 ```
-id, store_id, name, slug, rating, store_rating, status,
-created_at, updated_at
-PRIMARY KEY (id), UNIQUE (slug), KEY (store_id)
+id, store_id, location_id, name, slug, rating, store_rating, status,
+description, created_at, updated_at
+PRIMARY KEY (id), UNIQUE (slug), KEY (store_id), KEY (location_id)
 FOREIGN KEY (store_id) REFERENCES stores (id)
+FOREIGN KEY (location_id) REFERENCES locations (id) ON DELETE RESTRICT
 ```
 
-`status` default is `active`. `rating` and `store_rating` are decimal ratings carried from marketplace data; the importer updates `store_rating` from the scrape.
+`status` default is `active`. `rating` and `store_rating` are decimal ratings carried from marketplace data; the importer updates `store_rating` from the scrape. `description` is plain text, up to 1000 characters.
 
 ### `products`
 
@@ -279,12 +291,14 @@ AdminSearchController reads it and toggles is_indexed for sitemap inclusion.
 - unique key `(store_id, external_id)` on `offers` (NULL `external_id` rows may repeat);
 - `stores.affiliate_url_template` `varchar(500)` NULL.
 
-`dump_sql_gudangpc.sql` is currently the authoritative full schema; `initial_database.sql` does not contain the catalog tables.
+The authoritative schema is `database/migrations/dump_sql_gudangpc.sql` plus migrations 023 and 024; the dump itself was exported before them. `initial_database.sql` does not contain the catalog tables.
 
 **Migration 022** is applied. The `price_history` table, its index `idx_price_history_offer_recorded` and its foreign key to `offers` (`ON DELETE CASCADE`) exist in the current dump:
 
 - `price_history`: `id`, `offer_id` (`ON DELETE CASCADE`), `price_idr bigint unsigned`, `recorded_at datetime`;
 - index on `(offer_id, recorded_at)`; no `created_at` / `updated_at`.
+
+**Migrations 023 and 024** are applied. Migration 023 creates the `locations` table (`database/migrations/023_locations.sql`); migration 024 adds `vendors.location_id` (FK to `locations.id`, `ON DELETE RESTRICT`) and `vendors.description` `varchar(1000)` NULL (`database/migrations/024_vendor_location_description.sql`). The old plan for a `vendor_stores` join table was not built and remains parked.
 
 ### Not in the database
 
@@ -305,6 +319,7 @@ Any code that writes to search_cache must produce valid JSON.
 | `/categories` | Category list |
 | `/brands` | Brand list |
 | `/brand/<slug>` | Brand page |
+| `/seller/<slug>` | Active seller page |
 | `/<category-slug>` | Category page |
 | `/<category-slug>/<product-slug>` | Product detail page |
 | `/search?q=` | Search results |
@@ -329,6 +344,7 @@ Any code that writes to search_cache must produce valid JSON.
 | `/dashboard/brands[...]` | Brands |
 | `/dashboard/stores[...]` | Marketplaces |
 | `/dashboard/vendors[...]` | Sellers |
+| `/dashboard/locations[...]` | Locations |
 | `/dashboard/products[...]` | Products; offers can be added, edited and deleted inside the product edit page; the product create page accepts an optional first offer |
 | `/dashboard/products/import` | CSV import form; `/store` handles the upload |
 | `/dashboard/settings` | Settings |
@@ -337,6 +353,12 @@ Any code that writes to search_cache must produce valid JSON.
 `[...]` means the standard CRUD pattern from `AGENTS.md`: list, `create`, `store`, `(<id>)/edit`, `(<id>)/update`, `(<id>)/delete`.
 
 Staff can enter the first offer while creating a product via the optional "First offer" block (vendor, price, affiliate URL, in stock). If the block is empty no offer is created. If the product is created but the offer fails, the product stays and staff land on the edit page with an error.
+
+The seller page at `/seller/<slug>` is available only for active vendors. It shows the seller name, marketplace, rating (`store_rating` preferred, else `rating`), location, escaped description with line breaks kept, and a 20-per-page grid (`?page=N`) of published products that have an active offer from that seller. The card price is that seller's lowest active price; the seller count is the total active offers for the product. Unknown or inactive slugs return 404. Seller pages have no `seo_meta` records and no sitemap entry; their title and description come from the seller's name and description. "seller" is a reserved slug.
+
+The homepage has "Toko di <location>" sections after the per-category sections and before "Merek": at most 4 locations (most eligible sellers first, then name), each with at most 4 seller cards (most eligible products first, then name). An eligible seller is active, has a location and has at least one published product with an active offer from that seller; sellers without a location do not appear.
+
+On the product page the seller name in both Compare Prices tables links to `/seller/<slug>` when a vendor exists, and the seller's location is printed under the name when set.
 
 ---
 
@@ -359,8 +381,8 @@ The PO splits each phase into small tasks. The worker only ever sees the current
 2. **Image mirroring:** download and convert the scraper's `image_url` (signed marketplace URLs expire); decide whether seller images are acceptable.
 3. **Specs and compare:** `spec_definitions` per category, specs on products, then compare within one category only.
 4. **Price chart and price-drop alerts** for members (needs price history and a way to reach members).
-5. **Indonesian UI** and Indonesian meta titles (`<html lang="id">`).
-6. **Public marketplace and seller pages.**
+5. **Indonesian meta titles on public pages.**
+6. **Public marketplace pages.** Seller pages are done at `/seller/<slug>`.
 7. **Member onboarding:** decide between admin activation (today), automatic activation, or WhatsApp verification.
 8. **A migration runner** (`bin/migrate.php` plus a `migrations` table); today migrations are run by hand and migration 012 depends on constraint names.
 9. **Caching** of the homepage queries.

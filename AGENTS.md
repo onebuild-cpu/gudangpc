@@ -121,7 +121,7 @@ $router->addRoute('dashboard/users/(\d+)/edit', 'UserController', 'edit');  // G
 - Every `<form method="POST">` must contain `<?= \App\Core\CsrfProtection::getHiddenInput() ?>`.
 - The CSP blocks inline handlers (`onclick=""`, `onsubmit=""`) and inline `style=""` is discouraged. Never use inline event attributes. Inline `<script>` and `<style>` blocks MUST have `nonce="<?= $nonce ?>"`. Prefer Bootstrap's built-in `data-bs-*` behaviour (modals, collapse, dropdowns) over custom JS.
 - UI framework: Bootstrap 5 + Bootstrap Icons (`bi bi-*`). Reuse existing classes from `public/assets/css/dashboard.css`. Put new shared CSS there only if the task says so.
-- UI language: English.
+- UI language: English in the dashboard, Indonesian on public pages.
 
 ## 5. Security checklist (every task)
 
