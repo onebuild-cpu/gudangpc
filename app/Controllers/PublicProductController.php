@@ -124,7 +124,7 @@ $pageTitle = '';
 if (isset($seo['seo_title']) && $seo['seo_title'] !== '') {
     $pageTitle = (string) $seo['seo_title'];
 } elseif ($productName !== '') {
-    $pageTitle = $productName . ' - Price Comparison | GudangPC';
+    $pageTitle = $productName . ' - Bandingkan Harga | GudangPC';
 }
 
 $metaDescription = '';
@@ -132,7 +132,7 @@ if (isset($product['short_description']) && $product['short_description'] !== ''
     $metaDescription = (string) $product['short_description'];
 }
 if ($metaDescription === '') {
-    $metaDescription = Seo::plainText('Compare prices for ' . $productName . '.', 155);
+    $metaDescription = Seo::plainText('Bandingkan harga ' . $productName . '.', 155);
 }
 if (isset($seo['seo_description']) && $seo['seo_description'] !== '') {
     $metaDescription = (string) $seo['seo_description'];
@@ -350,8 +350,8 @@ if (isset($seo['seo_description']) && $seo['seo_description'] !== '') {
     {
         http_response_code(404);
         $this->view('errors/404', [
-            'pageTitle' => '404 Not Found',
-            'metaDescription' => 'The requested page could not be found.',
+            'pageTitle' => '404 Tidak Ditemukan',
+            'metaDescription' => 'Halaman yang diminta tidak ditemukan.',
         ]);
     }
 }

@@ -62,7 +62,7 @@ if (isset($brandName)) {
     $brandValue = (string) $brandName;
 }
 
-$disclosureText = 'We may earn a commission from purchases made through our links.';
+$disclosureText = 'Kami dapat memperoleh komisi dari pembelian yang dilakukan melalui tautan kami.';
 
 if (!isset($offers)) {
     $offers = [];
@@ -113,19 +113,19 @@ foreach ($offers as $offerRow) {
     }
 }
 
-$updatedText = 'Unknown';
+$updatedText = 'Tidak diketahui';
 if ($latestCheckedAt !== '') {
     $latestCheckedTimestamp = strtotime($latestCheckedAt);
     if ($latestCheckedTimestamp !== false) {
         $elapsed = time() - $latestCheckedTimestamp;
         if ($elapsed < 3600) {
-            $updatedText = 'just now';
+            $updatedText = 'baru saja';
         } elseif ($elapsed < 86400) {
             $hoursAgo = (int) floor($elapsed / 3600);
-            $updatedText = $hoursAgo . ' hour(s) ago';
+            $updatedText = $hoursAgo . ' jam lalu';
         } else {
             $daysAgo = (int) floor($elapsed / 86400);
-            $updatedText = $daysAgo . ' day(s) ago';
+            $updatedText = $daysAgo . ' hari lalu';
         }
     }
 }
@@ -180,22 +180,22 @@ if ($inWishlistValue) {
 
             <div class="card product-detail-card mt-4">
                 <div class="card-body">
-                    <h2 class="h5 mb-3">Compare Prices</h2>
+                    <h2 class="h5 mb-3">Bandingkan Harga</h2>
                     <?php if ($offerCount === 0): ?>
-                        <p class="text-muted mb-0">No active offers right now.</p>
+                        <p class="text-muted mb-0">Saat ini tidak ada penawaran aktif.</p>
                     <?php else: ?>
                         <div class="table-responsive">
                             <table class="table table-sm align-middle mb-0 price-table">
                                 <thead>
                                     <tr>
                                         <th scope="col">Marketplace</th>
-                                        <th scope="col">Seller</th>
-                                        <th scope="col">Listing Title</th>
-                                        <th scope="col">Seller Rating</th>
-                                        <th scope="col">Product Rating</th>
-                                        <th scope="col">Sold</th>
-                                        <th scope="col">Price</th>
-                                        <th scope="col" class="text-end">Buy</th>
+                                        <th scope="col">Penjual</th>
+                                        <th scope="col">Judul Listing</th>
+                                        <th scope="col">Rating Penjual</th>
+                                        <th scope="col">Rating Produk</th>
+                                        <th scope="col">Terjual</th>
+                                        <th scope="col">Harga</th>
+                                        <th scope="col" class="text-end">Beli</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -211,7 +211,7 @@ if ($inWishlistValue) {
                                         $sellerValue = (string) $offer['vendor_name'];
                                     }
                                     if ($sellerValue === '') {
-                                        $sellerValue = 'General';
+                                        $sellerValue = 'Umum';
                                     }
 
                                     $sellerSlugValue = '';
@@ -303,12 +303,12 @@ if ($inWishlistValue) {
                                         </td>
                                         <td class="offer-price">
                                             <?php if ($offerIndex === 0): ?>
-                                                <span class="badge bg-success">Lowest Price</span>
+                                                <span class="badge bg-success">Harga Terendah</span>
                                             <?php endif; ?>
                                             <?= htmlspecialchars($priceText) ?>
                                         </td>
                                         <td class="text-end">
-                                            <a class="btn btn-danger btn-sm" href="<?= htmlspecialchars($offerBuyUrl) ?>" target="_blank" rel="sponsored nofollow noopener">Buy</a>
+                                            <a class="btn btn-danger btn-sm" href="<?= htmlspecialchars($offerBuyUrl) ?>" target="_blank" rel="sponsored nofollow noopener">Beli</a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
@@ -318,7 +318,7 @@ if ($inWishlistValue) {
 
                         <?php if ($hiddenOfferCount > 0): ?>
                             <div class="mt-3">
-                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#moreOffers" aria-expanded="false" aria-controls="moreOffers">Show all <?= $offerCount ?> offers</button>
+                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#moreOffers" aria-expanded="false" aria-controls="moreOffers">Lihat semua <?= $offerCount ?> penawaran</button>
                             </div>
                             <div class="collapse mt-3" id="moreOffers">
                                 <div class="table-responsive">
@@ -326,13 +326,13 @@ if ($inWishlistValue) {
                                         <thead>
                                             <tr>
                                         <th scope="col">Marketplace</th>
-                                        <th scope="col">Seller</th>
-                                        <th scope="col">Listing Title</th>
-                                        <th scope="col">Seller Rating</th>
-                                        <th scope="col">Product Rating</th>
-                                        <th scope="col">Sold</th>
-                                        <th scope="col">Price</th>
-                                        <th scope="col" class="text-end">Buy</th>
+                                        <th scope="col">Penjual</th>
+                                        <th scope="col">Judul Listing</th>
+                                        <th scope="col">Rating Penjual</th>
+                                        <th scope="col">Rating Produk</th>
+                                        <th scope="col">Terjual</th>
+                                        <th scope="col">Harga</th>
+                                        <th scope="col" class="text-end">Beli</th>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -348,7 +348,7 @@ if ($inWishlistValue) {
                                                 $sellerValue = (string) $offer['vendor_name'];
                                             }
                                             if ($sellerValue === '') {
-                                                $sellerValue = 'General';
+                                                $sellerValue = 'Umum';
                                             }
 
                                             $sellerSlugValue = '';
@@ -440,7 +440,7 @@ if ($inWishlistValue) {
                                                 </td>
                                                 <td class="offer-price"><?= htmlspecialchars($priceText) ?></td>
                                                 <td class="text-end">
-                                                    <a class="btn btn-danger btn-sm" href="<?= htmlspecialchars($offerBuyUrl) ?>" target="_blank" rel="sponsored nofollow noopener">Buy</a>
+                                                    <a class="btn btn-danger btn-sm" href="<?= htmlspecialchars($offerBuyUrl) ?>" target="_blank" rel="sponsored nofollow noopener">Beli</a>
                                                 </td>
                                             </tr>
                                         <?php endforeach; ?>
@@ -455,18 +455,18 @@ if ($inWishlistValue) {
 
             <div class="card product-detail-card mt-4">
                 <div class="card-body">
-                    <h2 class="h5 mb-3">Description</h2>
+                    <h2 class="h5 mb-3">Deskripsi</h2>
                     <?php if ($descriptionHtml !== ''): ?>
                         <div class="product-description"><?= $descriptionHtml ?></div>
                     <?php else: ?>
-                        <p class="text-muted mb-0">No description available.</p>
+                        <p class="text-muted mb-0">Deskripsi tidak tersedia.</p>
                     <?php endif; ?>
                 </div>
             </div>
 
             <?php if (!empty($related)): ?>
             <div class="mt-4">
-                <h2 class="h5 mb-3">Related Products</h2>
+                <h2 class="h5 mb-3">Produk Terkait</h2>
                 <div class="row g-4">
                     <?php foreach ($related as $product): ?>
                     <?php include __DIR__ . '/../_product_card.php'; ?>
@@ -480,12 +480,12 @@ if ($inWishlistValue) {
             <div class="card price-box">
                 <div class="card-body">
                     <?php if ($offerCount > 0): ?>
-                        <h2 class="h4 fw-bold mb-1">From Rp <?= number_format($lowestPrice, 0, ',', '.') ?></h2>
-                        <p class="small text-muted mb-1"><?= $offerCount ?> sellers</p>
-                        <p class="small text-muted">Updated <?= htmlspecialchars($updatedText) ?></p>
-                        <a class="btn btn-danger w-100 mb-3" href="<?= htmlspecialchars($buyUrl) ?>" target="_blank" rel="sponsored nofollow noopener">Buy</a>
+                        <h2 class="h4 fw-bold mb-1">Mulai Rp <?= number_format($lowestPrice, 0, ',', '.') ?></h2>
+                        <p class="small text-muted mb-1"><?= $offerCount ?> penjual</p>
+                        <p class="small text-muted">Diperbarui <?= htmlspecialchars($updatedText) ?></p>
+                        <a class="btn btn-danger w-100 mb-3" href="<?= htmlspecialchars($buyUrl) ?>" target="_blank" rel="sponsored nofollow noopener">Beli</a>
                     <?php else: ?>
-                        <p class="text-muted">No active offers right now.</p>
+                        <p class="text-muted">Saat ini tidak ada penawaran aktif.</p>
                     <?php endif; ?>
 
                     <form method="POST" action="<?= htmlspecialchars($wishlistUrl) ?>" class="m-0">

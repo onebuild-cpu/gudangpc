@@ -18,6 +18,9 @@ class Model
     // Empty array means allow any valid table name (alphanumeric + underscore)
     protected static array $allowedTables = [];
 
+    /**
+     * Store the database connection and validate the table name.
+     */
     public function __construct(PDO $pdo)
     {
         if (!$pdo) {

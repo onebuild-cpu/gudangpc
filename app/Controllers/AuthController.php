@@ -22,6 +22,9 @@ class AuthController extends Controller
     private MemberModel $memberModel;
     private RateLimiter $rateLimiter;
 
+    /**
+     * Inject the database connection and build the auth models.
+     */
     public function __construct(PDO $pdo)
     {
         parent::__construct($pdo);
@@ -30,9 +33,12 @@ class AuthController extends Controller
         $this->rateLimiter = new RateLimiter($pdo);
     }
 
+    /**
+     * Render the public sign-in form.
+     */
     public function showLogin(): void
     {
-        $this->view('auth/login', ['pageTitle' => 'Sign In']);
+        $this->view('auth/login', ['pageTitle' => 'Masuk']);
     }
 
     /**
@@ -40,7 +46,7 @@ class AuthController extends Controller
      */
     public function showRegister(): void
     {
-        $this->view('auth/register', ['pageTitle' => 'Register']);
+        $this->view('auth/register', ['pageTitle' => 'Daftar']);
     }
 
     /**
@@ -140,6 +146,9 @@ class AuthController extends Controller
         $this->redirect('/login');
     }
 
+    /**
+     * Authenticate a member or staff user from the submitted form.
+     */
     public function login(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -283,6 +292,9 @@ class AuthController extends Controller
         }
     }
 
+    /**
+     * Destroy the current session and clear the login state.
+     */
     public function logout(): void
     {
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

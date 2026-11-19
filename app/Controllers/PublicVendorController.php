@@ -77,14 +77,14 @@ class PublicVendorController extends Controller
 
         $pageTitle = '';
         if ($sellerName !== '') {
-            $pageTitle = $sellerName . ' Products - Price Comparison | GudangPC';
+            $pageTitle = 'Produk ' . $sellerName . ' - Bandingkan Harga | GudangPC';
         }
 
         $metaDescription = '';
         if ($plainSellerDescription !== '') {
             $metaDescription = $plainSellerDescription;
         } else {
-            $metaDescription = 'Compare prices for ' . $sellerName . ' products across Indonesian marketplaces.';
+            $metaDescription = 'Bandingkan harga produk ' . $sellerName . ' di berbagai marketplace Indonesia.';
         }
 
         $canonicalUrl = Seo::absoluteUrl('/seller/' . $slug);
@@ -115,8 +115,8 @@ class PublicVendorController extends Controller
     {
         http_response_code(404);
         $this->view('errors/404', [
-            'pageTitle' => '404 Not Found',
-            'metaDescription' => 'The requested page could not be found.',
+            'pageTitle' => '404 Tidak Ditemukan',
+            'metaDescription' => 'Halaman yang diminta tidak ditemukan.',
         ]);
     }
 }

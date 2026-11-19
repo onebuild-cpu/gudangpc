@@ -11,6 +11,9 @@ class SocialAuthController extends Controller
 {
     private MemberModel $memberModel;
 
+    /**
+     * Inject the database connection and build the member model.
+     */
     public function __construct(PDO $pdo)
     {
         parent::__construct($pdo);

@@ -62,7 +62,7 @@ if ($brandDescriptionHtml === '' && isset($fallbackDescription)) {
             <div class="col-md-8">
                 <h1 class="fw-bold mb-3"><?= htmlspecialchars((string) $brand['name']) ?></h1>
                 <?php if ($brandDescriptionHtml !== ''): ?>
-                    <div class="brand-description text-muted lead" style="font-size: 1.1rem;">
+                    <div class="brand-description text-muted lead moved-lead-lg">
                         <?php // $brandDescriptionHtml was cleaned by RichText::clean(); it is the only unescaped output on this page. ?>
                         <?= $brandDescriptionHtml ?>
                     </div>
@@ -71,7 +71,7 @@ if ($brandDescriptionHtml === '' && isset($fallbackDescription)) {
 
             <?php if ($brandHeroImage !== ''): ?>
                 <div class="col-md-4 text-center text-md-end">
-                    <img src="<?= $base . htmlspecialchars((string) $brandHeroImage) ?>" alt="<?= htmlspecialchars((string) $brandHeroAlt) ?>" class="img-fluid rounded shadow-sm" style="max-height: 180px; object-fit: contain;">
+                    <img src="<?= $base . htmlspecialchars((string) $brandHeroImage) ?>" alt="<?= htmlspecialchars((string) $brandHeroAlt) ?>" class="img-fluid rounded shadow-sm moved-thumb-lg">
                 </div>
             <?php endif; ?>
         </div>

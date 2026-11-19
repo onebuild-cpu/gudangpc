@@ -406,14 +406,14 @@ class PublicSearchController extends Controller
         string $canonicalUrl,
         array $aiParams = []
     ): void {
-        $pageTitle = 'Search';
+        $pageTitle = 'Cari';
         if ($query !== '') {
-            $pageTitle = 'Search results for ' . $query;
+            $pageTitle = 'Hasil pencarian: ' . $query . ' | GudangPC';
         }
 
         $this->view('public/search/index', [
             'pageTitle' => $pageTitle,
-            'metaDescription' => 'Search products',
+            'metaDescription' => 'Cari produk',
             'query' => $query,
             'products' => $products,
             'results' => $products,

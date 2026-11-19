@@ -37,7 +37,7 @@ if ($cardOfferCount <= 0) {
 }
 ?>
 <div class="col-md-3">
-    <div class="product-card h-100 border rounded-3 overflow-hidden <?= $cardDimClass ?>" style="background: #fff; display: flex; flex-direction: column;">
+    <div class="product-card h-100 border rounded-3 overflow-hidden moved-product-card <?= $cardDimClass ?>">
         <?php
         $productUrl = '';
         if ($cardCategorySlug !== '' && $cardSlug !== '') {
@@ -46,11 +46,11 @@ if ($cardOfferCount <= 0) {
         ?>
         <?php if ($cardImagePath === ''): ?>
             <div class="product-card-placeholder">
-                <i class="bi bi-image text-muted" style="font-size: 3rem;"></i>
+                <i class="bi bi-image text-muted moved-icon-lg"></i>
             </div>
         <?php else: ?>
             <?php if ($productUrl !== ''): ?>
-                <a href="<?= htmlspecialchars($productUrl) ?>" class="product-card-link" style="width: 100%; height: 100%; display: block;">
+                <a href="<?= htmlspecialchars($productUrl) ?>" class="product-card-link moved-card-fill">
                     <img src="<?= $base . htmlspecialchars($cardImagePath) ?>" alt="<?= htmlspecialchars($cardName) ?>" class="product-card-img" loading="lazy">
                 </a>
             <?php else: ?>
@@ -61,7 +61,7 @@ if ($cardOfferCount <= 0) {
         <div class="p-3 d-flex flex-column flex-grow-1">
             <div class="product-brand small text-muted fw-normal"><?= htmlspecialchars($cardBrandName) ?></div>
             <?php if ($productUrl !== ''): ?>
-                <a href="<?= htmlspecialchars($productUrl) ?>" class="product-name-link" style="color: inherit; text-decoration: none;">
+                <a href="<?= htmlspecialchars($productUrl) ?>" class="product-name-link moved-link-plain">
                     <h3 class="product-name mt-3 small fw-bold"><?= htmlspecialchars($cardName) ?></h3>
                 </a>
             <?php else: ?>
@@ -79,7 +79,7 @@ if ($cardOfferCount <= 0) {
 
             <div class="d-flex justify-content-between align-items-center mt-3 gap-2">
                 <?php if ($productUrl !== ''): ?>
-                    <a href="<?= htmlspecialchars($productUrl) ?>" class="btn btn-outline-primary flex-grow-1" style="color: inherit; text-decoration: none;">Lihat Detail</a>
+                    <a href="<?= htmlspecialchars($productUrl) ?>" class="btn btn-outline-primary flex-grow-1 moved-link-plain">Lihat Detail</a>
                     <a href="<?= htmlspecialchars($productUrl) ?>" class="btn btn-link p-0 text-danger"><i class="bi bi-heart-fill"></i></a>
                 <?php endif; ?>
             </div>

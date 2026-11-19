@@ -18,6 +18,9 @@ class DashboardController extends Controller
     private MemberModel $memberModel;
     private ClickModel $clickModel;
 
+    /**
+     * Inject the database connection and build the dashboard models.
+     */
     public function __construct(PDO $pdo)
     {
         parent::__construct($pdo);
@@ -28,6 +31,9 @@ class DashboardController extends Controller
         $this->clickModel = new ClickModel($pdo);
     }
 
+    /**
+     * Render the dashboard overview with catalog counters.
+     */
     public function index(): void
     {
         $this->requireLogin();
@@ -50,6 +56,9 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Render affiliate click analytics for staff.
+     */
     public function clicks(): void
     {
         $this->requireLogin();
@@ -93,6 +102,9 @@ class DashboardController extends Controller
         ]);
     }
 
+    /**
+     * Render the current staff member's profile page.
+     */
     public function profile(): void
     {
         $this->requireLogin();

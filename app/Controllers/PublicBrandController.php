@@ -40,8 +40,8 @@ class PublicBrandController extends Controller
         $brands = $this->brandModel->findAllPublished();
 
         $this->view('public/brands/index', [
-            'pageTitle' => 'Brands',
-            'metaDescription' => 'Browse all product brands',
+            'pageTitle' => 'Merek',
+            'metaDescription' => 'Jelajahi semua merek produk',
             'brands' => $brands,
             'seo' => null,
             'canonicalUrl' => Seo::absoluteUrl('/brands'),
@@ -144,7 +144,7 @@ $pageTitle = '';
 if (isset($seo['seo_title']) && $seo['seo_title'] !== '') {
     $pageTitle = (string) $seo['seo_title'];
 } elseif ($brandName !== '') {
-    $pageTitle = $brandName . ' Products - Price Comparison | GudangPC';
+    $pageTitle = 'Produk ' . $brandName . ' - Bandingkan Harga | GudangPC';
 }
 
 $metaDescription = '';
@@ -153,7 +153,7 @@ if (isset($seo['seo_description']) && $seo['seo_description'] !== '') {
 } elseif ($plainBrandDescription !== '') {
     $metaDescription = $plainBrandDescription;
 } else {
-    $metaDescription = 'Compare prices for ' . $brandName . ' products across Indonesian marketplaces.';
+    $metaDescription = 'Bandingkan harga produk ' . $brandName . ' di berbagai marketplace Indonesia.';
 }
 
         $ogImage = '';
@@ -237,8 +237,8 @@ if (isset($seo['seo_description']) && $seo['seo_description'] !== '') {
     {
         http_response_code(404);
         $this->view('errors/404', [
-            'pageTitle' => '404 Not Found',
-            'metaDescription' => 'The requested page could not be found.',
+            'pageTitle' => '404 Tidak Ditemukan',
+            'metaDescription' => 'Halaman yang diminta tidak ditemukan.',
         ]);
     }
 }

@@ -8,6 +8,9 @@ class WishlistModel extends Model
 {
     protected string $table = 'wishlists';
 
+    /**
+     * Save a product to a member's wishlist.
+     */
     public function add(int $memberId, int $productId): bool
     {
         $sql = "INSERT INTO {$this->table} (member_id, product_id) VALUES (?, ?)";
@@ -15,6 +18,9 @@ class WishlistModel extends Model
         return $stmt->execute([$memberId, $productId]);
     }
 
+    /**
+     * Remove a product from a member's wishlist.
+     */
     public function remove(int $memberId, int $productId): bool
     {
         $sql = "DELETE FROM {$this->table} WHERE member_id = ? AND product_id = ?";
@@ -35,6 +41,9 @@ class WishlistModel extends Model
         return (int) $row['c'] > 0;
     }
 
+    /**
+     * Return all published wishlist products for one member.
+     */
     public function findAllByMember(int $memberId): array
     {
         $sql = "SELECT w.product_id, p.name AS product_name, p.slug AS product_slug, p.image, 

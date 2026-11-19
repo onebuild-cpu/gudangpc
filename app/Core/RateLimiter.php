@@ -28,11 +28,17 @@ class RateLimiter
         'ai_search' => ['max' => 20, 'window' => 60],
     ];
 
+    /**
+     * Store the database connection used for rate limiting.
+     */
     public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
     }
 
+    /**
+     * Return whether an action is allowed and its remaining attempts.
+     */
     public function check(string $key, string $action = 'login'): array
     {
         $config = ['max' => 10, 'window' => 60];
@@ -68,6 +74,9 @@ class RateLimiter
         return ['allowed' => $allowed, 'remaining' => $remaining, 'retry_after' => $retryAfter];
     }
 
+    /**
+     * Record one attempt for the given key and action.
+     */
     public function record(string $key, string $action = 'login'): void
     {
         $config = ['max' => 10, 'window' => 60];
@@ -102,6 +111,9 @@ class RateLimiter
         $stmt->execute(['bucket' => $bucket, 'action' => $action]);
     }
 
+    /**
+     * Check the limit and record an attempt, throwing when exceeded.
+     */
     public function consume(string $key, string $action = 'login'): void
     {
         $result = $this->check($key, $action);
@@ -127,6 +139,9 @@ class RateLimiter
         $this->record($key, $action);
     }
 
+    /**
+     * Clear all recorded attempts for the given key and action.
+     */
     public function clear(string $key, string $action = 'login'): void
     {
         $bucket = $this->getIdentifier($key);

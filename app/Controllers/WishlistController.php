@@ -16,6 +16,9 @@ class WishlistController extends Controller
     private WishlistModel $wishlistModel;
     private ProductModel $productModel;
 
+    /**
+     * Inject the database connection and build the wishlist models.
+     */
     public function __construct(PDO $pdo)
     {
         parent::__construct($pdo);

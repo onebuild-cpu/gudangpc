@@ -75,7 +75,7 @@ Custom PHP MVC called "OneBuild". No Composer, no framework. PSR-4 autoloader, n
 | `app/Core/` | Router, Model, Controller, Validator, CsrfProtection, RateLimiter, SecurityLogger. |
 | `views/` | Raw PHP templates. Folders: `layouts/`, `auth/`, `dashboard/`, `home/`, `errors/`. |
 | `public/` | Only web-exposed folder. `index.php` is the front controller. |
-| `database/` | SQL files. New schema changes go in `database/migrations/NNN_name.sql`. |
+| `database/` | SQL files. New schema changes go in `database/migrations/NNN_name.sql`. New migrations are run with `bin/migrate.php`; the worker still never runs them. |
 | `storage/` | Logs and sessions. Never commit contents. |
 
 ### Routing (copy this exact style)

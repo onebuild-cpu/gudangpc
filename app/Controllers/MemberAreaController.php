@@ -74,8 +74,8 @@ class MemberAreaController extends Controller
         unset($member['password']);
 
         $this->view('member/dashboard', [
-            'pageTitle' => 'Member Area',
-            'metaDescription' => 'Your member area',
+            'pageTitle' => 'Area Anggota',
+            'metaDescription' => 'Area anggota Anda',
             'member' => $member,
             'displayName' => $displayName,
             'wishlist' => $wishlist,
@@ -191,8 +191,8 @@ class MemberAreaController extends Controller
         unset($member['password']);
 
         $this->view('member/profile', [
-            'pageTitle' => 'My Profile',
-            'metaDescription' => 'Edit your member profile',
+            'pageTitle' => 'Profil Saya',
+            'metaDescription' => 'Ubah profil anggota Anda',
             'user' => $member,
             'error' => $error,
             'success' => $success,

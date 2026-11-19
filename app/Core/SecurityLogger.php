@@ -10,6 +10,9 @@ class SecurityLogger {
     private string $logFile;
     private int $maxFileSize = 10485760; // 10MB
 
+    /**
+     * Prepare the security log directory and file.
+     */
     public function __construct() {
         $baseDir = __DIR__ . '/../../storage/logs/security';
         $this->logDir = $baseDir;
@@ -26,6 +29,9 @@ class SecurityLogger {
         }
     }
 
+    /**
+     * Append one structured security event to the log file.
+     */
     public function log(string $level, string $event, array $details = []): void {
         $userAgent = 'unknown';
         if (isset($_SERVER['HTTP_USER_AGENT'])) {
@@ -69,20 +75,32 @@ class SecurityLogger {
         @chmod($this->logFile, 0640);
     }
 
+    /**
+     * Log a suspicious event with its explanatory message.
+     */
     public function logSuspicious(string $event, string $message, array $details = []): void {
         $details['message'] = $message;
         $this->log('warning', $event, $details);
     }
 
+    /**
+     * Log an informational security event.
+     */
     public function logInfo(string $event, array $details = []): void {
         $this->log('info', $event, $details);
     }
 
+    /**
+     * Log an error event with its explanatory message.
+     */
     public function logError(string $event, string $message, array $details = []): void {
         $details['message'] = $message;
         $this->log('error', $event, $details);
     }
 
+    /**
+     * Log an authentication attempt and whether it succeeded.
+     */
     public function logAuth(string $event, bool $success, array $details = []): void {
         $details['success'] = $success;
         $logLevel = 'warning';

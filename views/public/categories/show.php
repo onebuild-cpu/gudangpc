@@ -52,7 +52,7 @@ if (isset($category['description'])) {
             <div class="col-md-8">
                 <h1 class="fw-bold mb-3"><?= htmlspecialchars((string) $category['name']) ?></h1>
                 <?php if ($categoryDescriptionHtml !== ''): ?>
-                    <div class="category-description text-muted lead" style="font-size: 1.1rem;">
+                    <div class="category-description text-muted lead moved-lead-lg">
                         <?php // $categoryDescriptionHtml was cleaned by RichText::clean(); it is the only unescaped output on this page. ?>
                         <?= $categoryDescriptionHtml ?>
                     </div>
@@ -61,7 +61,7 @@ if (isset($category['description'])) {
 
             <?php if ($categoryImagePath !== ''): ?>
                 <div class="col-md-4 text-center text-md-end">
-                    <img src="<?= $base . htmlspecialchars((string) $categoryImagePath) ?>" alt="<?= htmlspecialchars((string) $category['name']) ?>" class="img-fluid rounded shadow-sm" style="max-height: 180px; object-fit: contain;">
+                    <img src="<?= $base . htmlspecialchars((string) $categoryImagePath) ?>" alt="<?= htmlspecialchars((string) $category['name']) ?>" class="img-fluid rounded shadow-sm moved-thumb-lg">
                 </div>
             <?php endif; ?>
         </div>

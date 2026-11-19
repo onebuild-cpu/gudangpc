@@ -105,7 +105,7 @@ $pageTitle = '';
 if (isset($seo['seo_title']) && $seo['seo_title'] !== '') {
     $pageTitle = (string) $seo['seo_title'];
 } elseif ($categoryName !== '') {
-    $pageTitle = $categoryName . ' - Price Comparison | GudangPC';
+    $pageTitle = $categoryName . ' - Bandingkan Harga | GudangPC';
 }
 
 $metaDescription = '';
@@ -114,7 +114,7 @@ if (isset($seo['seo_description']) && $seo['seo_description'] !== '') {
 } elseif ($plainCategoryDescription !== '') {
     $metaDescription = $plainCategoryDescription;
 } else {
-    $metaDescription = 'Compare ' . $categoryName . ' prices across Indonesian marketplaces.';
+    $metaDescription = 'Bandingkan harga ' . $categoryName . ' di berbagai marketplace Indonesia.';
 }
 
         $ogImage = '';
@@ -194,8 +194,8 @@ if (isset($seo['seo_description']) && $seo['seo_description'] !== '') {
     {
         http_response_code(404);
         $this->view('errors/404', [
-            'pageTitle' => '404 Not Found',
-            'metaDescription' => 'The requested page could not be found.',
+            'pageTitle' => '404 Tidak Ditemukan',
+            'metaDescription' => 'Halaman yang diminta tidak ditemukan.',
         ]);
     }
 }

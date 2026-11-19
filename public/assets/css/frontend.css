@@ -517,3 +517,13 @@ html, body {
         transform: translate(-50%, -110%);
     }
 }
+
+/* Moved from inline styles */
+.moved-product-card { background: #fff; display: flex; flex-direction: column; }
+.moved-icon-lg { font-size: 3rem; }
+.moved-card-fill { width: 100%; height: 100%; display: block; }
+.moved-link-plain { color: inherit; text-decoration: none; }
+.moved-poppins-heading { font-family: 'Poppins', sans-serif; }
+.moved-thumb-sm { max-height: 80px; object-fit: contain; }
+.moved-thumb-lg { max-height: 180px; object-fit: contain; }
+.moved-lead-lg { font-size: 1.1rem; }

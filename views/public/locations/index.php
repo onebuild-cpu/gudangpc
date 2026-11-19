@@ -12,7 +12,7 @@ if (isset($GLOBALS['csp_nonce'])) {
 <?php require_once __DIR__ . '/../../layouts/navbar.php'; ?>
 
 <div class="container py-5">
-    <h1 class="mb-4 fw-bold" style="font-family: 'Poppins', sans-serif;">Lokasi Toko</h1>
+    <h1 class="mb-4 fw-bold moved-poppins-heading">Lokasi Toko</h1>
     <?php if (empty($locationSections)): ?>
         <p class="text-muted">Belum ada toko yang terdaftar di lokasi mana pun.</p>
     <?php else: ?>

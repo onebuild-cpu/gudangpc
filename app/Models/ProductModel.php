@@ -72,6 +72,9 @@ class ProductModel extends Model
         return $this->query($sql);
     }
 
+    /**
+     * Return the total number of products.
+     */
     public function countAll(): int
     {
         $sql = "SELECT COUNT(*) AS c FROM {$this->table}";
@@ -82,6 +85,9 @@ class ProductModel extends Model
         return (int) $row['c'];
     }
 
+    /**
+     * Return a filtered page of products with category and brand names.
+     */
     public function getAllWithRelationsPaginated(int $offset, int $limit, string $search = '', string $status = ''): array
     {
         $conditions = [];

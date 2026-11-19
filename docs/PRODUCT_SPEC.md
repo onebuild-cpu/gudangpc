@@ -120,12 +120,12 @@ D2 is not a change: the wishlist stays, and members still register as `pending` 
 - **Slugs:** lowercase `a-z`, `0-9` and `-`; unique per table; created from the name; not changed automatically on rename.
 - **Charset:** `utf8mb4`, collation `utf8mb4_unicode_ci`, engine InnoDB, except the legacy `users` table which is `utf8mb4_general_ci` in `initial_database.sql`.
 - **Timestamps:** every table has `created_at` and `updated_at`, except `offer_clicks` (only `clicked_at`), `wishlists` and `search_cache` (only `created_at`), and `price_history` (only `recorded_at`).
-- **Affiliate links:** public pages never print an affiliate URL directly. They link to `/go/<offer_id>`. Outbound links use `target="_blank"` and `rel="sponsored nofollow noopener"`. Pages with offers show the disclosure line: "We may earn a commission from purchases made through our links." Manual entry accepts only `http://` and `https://` URLs, the same as CSV import. Offers have status `draft` or `published`, editable in the offer edit form.
+- **Affiliate links:** public pages never print an affiliate URL directly. They link to `/go/<offer_id>`. Outbound links use `target="_blank"` and `rel="sponsored nofollow noopener"`. Pages with offers show the disclosure line: "Kami dapat memperoleh komisi dari pembelian yang dilakukan melalui tautan kami." Manual entry accepts only `http://` and `https://` URLs, the same as CSV import. Offers have status `draft` or `published`, editable in the offer edit form.
 - **Offer visibility:** only active offers (section 5) are shown publicly.
 - **Output safety:** all dynamic output is escaped. Rich descriptions are printed only after `\App\Core\RichText::clean()`.
 - **Deleting content:** a category cannot be deleted while products reference it. A marketplace cannot be deleted while offers or sellers reference it. A brand is not blocked; products pointing at it get `brand_id = NULL`. A location cannot be deleted while sellers reference it. Products and offers are hard-deleted from the dashboard after a confirm. An offer that already has click history must not be deleted; set it to Draft or Out of stock instead (task A4).
 - **Pagination:** public lists paginate at 20 per page with `?page=N`. The admin product list paginates at 20 per page.
-- **Language:** the dashboard is English; public pages are Indonesian.
+- **Language:** the dashboard is English; public pages are Indonesian. Page titles and meta descriptions on public pages are Indonesian unless an SEO record overrides them.
 
 ### Security and configuration
 
@@ -299,7 +299,7 @@ AdminSearchController reads it and toggles is_indexed for sitemap inclusion.
 - unique key `(store_id, external_id)` on `offers` (NULL `external_id` rows may repeat);
 - `stores.affiliate_url_template` `varchar(500)` NULL.
 
-The authoritative schema is `database/migrations/dump_sql_gudangpc.sql` plus migrations 023, 024 and 025; the dump itself was exported before them. `initial_database.sql` does not contain the catalog tables.
+The structure-only schema is `database/schema.sql`, a `mysqldump --no-data` export taken after migration 025; migrations 023 to 025 are already included in it. New migrations start at 026. `database/initial_database.sql` does not contain the catalog tables. `database/migrations/dump_sql_gudangpc.sql` is kept only as history; it contains data rows (INSERT statements for `search_cache` and `users`), so it should be removed from the repository.
 
 **Migration 022** is applied. The `price_history` table, its index `idx_price_history_offer_recorded` and its foreign key to `offers` (`ON DELETE CASCADE`) exist in the current dump:
 
@@ -307,6 +307,8 @@ The authoritative schema is `database/migrations/dump_sql_gudangpc.sql` plus mig
 - index on `(offer_id, recorded_at)`; no `created_at` / `updated_at`.
 
 **Migrations 023, 024 and 025** are applied. Migration 023 creates the `locations` table (`database/migrations/023_locations.sql`); migration 024 adds `vendors.location_id` (FK to `locations.id`, `ON DELETE RESTRICT`) and `vendors.description` `varchar(1000)` NULL (`database/migrations/024_vendor_location_description.sql`); migration 025 adds `vendors.image` `varchar(255)` NULL (`database/migrations/025_vendors_image.sql`). The old plan for a `vendor_stores` join table was not built and remains parked.
+
+New migrations are applied with `php bin/migrate.php` using the `status`, `up` and `baseline` commands. The runner records applied filenames in the `schema_migrations` table (`filename` varchar(190) primary key, `applied_at` timestamp default current_timestamp). The worker never runs the runner; the PO does.
 
 ### Not in the database
 
@@ -393,6 +395,8 @@ Maintenance scripts in `bin/` create placeholder WebP images for categories (`cr
 
 `/locations` lists locations that have at least one eligible seller, ordered by seller count descending then location name; each section has a "(N Toko)" heading and cards for all its eligible sellers, with no pagination. The page uses two queries, is linked from the navbar as "Lokasi Toko", is not in the sitemap and has no `seo_meta`; "locations" is a reserved slug.
 
+A read-only smoke test, `php bin/smoke.php <base-url>`, runs GET-only checks against a deployed site for expected status codes, forbidden paths, security headers and Indonesian public text after each deploy.
+
 ---
 
 ## 10. Roadmap
@@ -414,10 +418,8 @@ The PO splits each phase into small tasks. The worker only ever sees the current
 2. **Image mirroring:** download and convert the scraper's `image_url` (signed marketplace URLs expire); decide whether seller images are acceptable.
 3. **Specs and compare:** `spec_definitions` per category, specs on products, then compare within one category only.
 4. **Price chart and price-drop alerts** for members (needs price history and a way to reach members).
-5. **Indonesian meta titles on public pages.**
 6. **Public marketplace pages.** Seller pages are done at `/seller/<slug>`.
 7. **Member onboarding:** decide between admin activation (today), automatic activation, or WhatsApp verification.
-8. **A migration runner** (`bin/migrate.php` plus a `migrations` table); today migrations are run by hand and migration 012 depends on constraint names.
 9. **Caching** of the homepage queries.
 
 ---

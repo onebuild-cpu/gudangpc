@@ -1,4 +1,0 @@
--- This file is superseded and must not be run.
--- The unique key on (product_id, vendor_id) is already created as
--- product_vendor by dump_sql_gudangpc.sql.
--- Running this file would add a redundant duplicate index.

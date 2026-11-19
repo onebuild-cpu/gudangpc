@@ -43,6 +43,9 @@ class UserModel extends Model {
         return $phone;
     }
 
+        /**
+         * Register a staff or user account with a hashed password.
+         */
         public function register(string $phone, string $plainPassword, string $role = 'user'): int {
         // Validate password
         if (strlen($plainPassword) < 8) {
@@ -123,14 +126,23 @@ class UserModel extends Model {
         return null;
     }
 
+    /**
+     * Find one staff account by phone number.
+     */
     public function findByPhone(string $phone): ?array {
         return $this->queryOne("SELECT * FROM {$this->table} WHERE phone = ?", [$phone]);
     }
 
+    /**
+     * Find one staff account by id.
+     */
     public function findById(int $id): ?array {
         return $this->queryOne("SELECT * FROM {$this->table} WHERE id = ?", [$id]);
     }
 
+    /**
+     * Update or clear the username of a staff account.
+     */
     public function updateUsername(int $id, string $username): bool {
         $username = trim($username);
 
@@ -188,6 +200,9 @@ class UserModel extends Model {
         return $this->update($id, ['password' => $hash]);
     }
 
+    /**
+     * Update the avatar path of a staff account.
+     */
     public function updateAvatar(int $id, string $avatarPath): bool {
         return $this->update($id, ['avatar' => $avatarPath]);
     }
