@@ -268,14 +268,16 @@ PRIMARY KEY (id), UNIQUE (query_text), UNIQUE (query_slug)
 Written by SearchCacheModel when AiSearchService parses a query.
 AdminSearchController reads it and toggles is_indexed for sitemap inclusion.
 
-### Planned schema (not yet applied)
+### Schema history (migration 021 applied)
 
-**Migration 021** adds listing identity and affiliate templates:
+**Migration 021** is applied. Listing identity and affiliate templates exist in the current dump:
 
 - `offers.source_url` `text` NULL: the scraped product page URL;
 - `offers.external_id` `varchar(100)` NULL: the marketplace listing id;
 - unique key `(store_id, external_id)` on `offers` (NULL `external_id` rows may repeat);
 - `stores.affiliate_url_template` `varchar(500)` NULL.
+
+`dump_sql_gudangpc.sql` is currently the authoritative full schema; `initial_database.sql` does not contain the catalog tables.
 
 **Migration 022** adds price history:
 

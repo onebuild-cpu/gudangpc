@@ -1,4 +1,4 @@
--- Enforce one offer per (product, vendor).
--- Run once. Fails if duplicates already exist; dedupe first if needed.
-ALTER TABLE offers
-    ADD UNIQUE KEY uniq_offers_product_vendor (product_id, vendor_id);
+-- This file is superseded and must not be run.
+-- The unique key on (product_id, vendor_id) is already created as
+-- product_vendor by dump_sql_gudangpc.sql.
+-- Running this file would add a redundant duplicate index.
