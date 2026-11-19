@@ -804,7 +804,8 @@ class AdminProductController extends Controller
         if (isset($_POST['short_description'])) {
             $rawShortDescription = $_POST['short_description'];
         }
-        if (mb_strlen($rawShortDescription, 'UTF-8') > 500) {
+        $measuredShortDescription = Validator::sanitize($rawShortDescription, 100000);
+        if (mb_strlen($measuredShortDescription, 'UTF-8') > 500) {
             throw new Exception('Short description must be at most 500 characters.');
         }
         $shortDescription = Validator::sanitize($rawShortDescription, 500);
