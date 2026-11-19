@@ -181,6 +181,14 @@ $router->addRoute('dashboard/vendors/(\d+)/edit', 'AdminVendorController', 'edit
 $router->addRoute('dashboard/vendors/(\d+)/update', 'AdminVendorController', 'update');
 $router->addRoute('dashboard/vendors/(\d+)/delete', 'AdminVendorController', 'delete');
 
+// Locations module (admin, root)
+$router->addRoute('dashboard/locations', 'AdminLocationController', 'index');
+$router->addRoute('dashboard/locations/create', 'AdminLocationController', 'create');
+$router->addRoute('dashboard/locations/store', 'AdminLocationController', 'store');
+$router->addRoute('dashboard/locations/(\d+)/edit', 'AdminLocationController', 'edit');
+$router->addRoute('dashboard/locations/(\d+)/update', 'AdminLocationController', 'update');
+$router->addRoute('dashboard/locations/(\d+)/delete', 'AdminLocationController', 'delete');
+
 // Products module (admin, root)
 $router->addRoute('dashboard/products', 'AdminProductController', 'index');
 $router->addRoute('dashboard/products/create', 'AdminProductController', 'create');

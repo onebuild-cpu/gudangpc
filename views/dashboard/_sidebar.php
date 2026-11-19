@@ -86,6 +86,17 @@ if (!isset($currentPage)) {
         </li>
             <li class="nav-item">
             <?php
+            $locationsActive = '';
+            if ($currentPage === 'locations') {
+                $locationsActive = 'active';
+            }
+            ?>
+            <a class="nav-link <?= $locationsActive ?>" href="<?= $base ?>/dashboard/locations">
+                <i class="bi bi-geo-alt"></i> Locations
+            </a>
+        </li>
+            <li class="nav-item">
+            <?php
             $productsActive = '';
             if ($currentPage === 'products' || $currentPage === 'products-import') {
                 $productsActive = 'active';

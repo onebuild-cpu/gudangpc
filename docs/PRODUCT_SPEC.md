@@ -118,7 +118,7 @@ D2 is not a change: the wishlist stays, and members still register as `pending` 
 - **Money:** Rupiah stored as an unsigned integer in `price_idr`. No decimals, no floats. Display with `number_format($price, 0, ',', '.')` and the prefix `Rp `.
 - **Slugs:** lowercase `a-z`, `0-9` and `-`; unique per table; created from the name; not changed automatically on rename.
 - **Charset:** `utf8mb4`, collation `utf8mb4_unicode_ci`, engine InnoDB, except the legacy `users` table which is `utf8mb4_general_ci` in `initial_database.sql`.
-- **Timestamps:** every table has `created_at` and `updated_at`, except `offer_clicks` (only `clicked_at`), `wishlists` and `search_cache` (only `created_at`), and the `price_history` (only `recorded_at`).
+- **Timestamps:** every table has `created_at` and `updated_at`, except `offer_clicks` (only `clicked_at`), `wishlists` and `search_cache` (only `created_at`), and `price_history` (only `recorded_at`).
 - **Affiliate links:** public pages never print an affiliate URL directly. They link to `/go/<offer_id>`. Outbound links use `target="_blank"` and `rel="sponsored nofollow noopener"`. Pages with offers show the disclosure line: "We may earn a commission from purchases made through our links." Manual entry accepts only `http://` and `https://` URLs, the same as CSV import. Offers have status `draft` or `published`, editable in the offer edit form.
 - **Offer visibility:** only active offers (section 5) are shown publicly.
 - **Output safety:** all dynamic output is escaped. Rich descriptions are printed only after `\App\Core\RichText::clean()`.
@@ -347,11 +347,11 @@ The PO splits each phase into small tasks. The worker only ever sees the current
 | Phase | Tasks | Purpose |
 |---|---|---|
 | 0 | T0.1 | Make this spec match reality |
-| A | A1 to A6 | Bugs and security: member registration, description output, one active-offer definition with freshness, offer editing with protected click history, hardened `/go/`, `robots.txt` and `sitemap.xml` |
+| A | A1 to A6 (A4 done, A6 done) | Bugs and security: member registration, description output, one active-offer definition with freshness, offer editing with protected click history, hardened `/go/`, `robots.txt` and `sitemap.xml` |
 | B | B1 to B4 | SEO output: helper and layout tags, wiring into pages, canonical clean-up and product URL redirect, breadcrumbs and structured data |
 | C | C1 to C7 | Browse experience: navbar clean-up, remove compare, product cards with prices, pagination and sorting, better search, homepage sections, product page polish |
 | D | D1 to D5 | Import engine: migrations for listing identity and affiliate templates, marketplace template field, importer hardening, price history, scraper update |
-| E | E1 and E2 | Dashboard: overview counters and click analytics, product list filters and pagination |
+| E | E1 (done) and E2 (done) | Dashboard: overview counters and click analytics, product list filters and pagination |
 
 ### Parked (do not build until the PO writes a task)
 
