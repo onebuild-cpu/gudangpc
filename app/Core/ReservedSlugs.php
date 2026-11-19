@@ -10,7 +10,7 @@ final class ReservedSlugs
     private const SLUGS = [
         'login', 'logout', 'register', 'verify-email',
         'member', 'dashboard',
-        'categories', 'category', 'brands', 'brand',
+        'categories', 'category', 'brands', 'brand', 'seller',
         'product', 'products', 'store', 'stores',
         'search', 'wishlist',
         'compare', 'go', 'csp-report',

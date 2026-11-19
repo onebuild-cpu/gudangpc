@@ -66,4 +66,24 @@ class VendorModel extends Model
 
         return (int) $row['c'];
     }
+
+    /**
+     * Return an active vendor by slug with its store and location names.
+     */
+    public function findActiveBySlug(string $slug): ?array
+    {
+        $sql = "SELECT v.*, s.name AS store_name, l.name AS location_name
+                FROM {$this->table} v
+                LEFT JOIN stores s ON s.id = v.store_id
+                LEFT JOIN locations l ON l.id = v.location_id
+                WHERE v.slug = ? AND v.status = 'active'
+                LIMIT 1";
+        $result = $this->queryOne($sql, [$slug]);
+
+        if ($result) {
+            return $result;
+        }
+
+        return null;
+    }
 }

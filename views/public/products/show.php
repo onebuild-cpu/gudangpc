@@ -214,6 +214,16 @@ if ($inWishlistValue) {
                                         $sellerValue = 'General';
                                     }
 
+                                    $sellerSlugValue = '';
+                                    if (isset($offer['vendor_slug']) && $offer['vendor_slug'] !== null) {
+                                        $sellerSlugValue = (string) $offer['vendor_slug'];
+                                    }
+                                    $sellerSlugText = htmlspecialchars($sellerSlugValue, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                                    $sellerIsLinked = false;
+                                    if ($sellerSlugValue !== '') {
+                                        $sellerIsLinked = true;
+                                    }
+
                                     $sellerLocationText = '';
                                     if (isset($offer['vendor_location_name']) && $offer['vendor_location_name'] !== null && $offer['vendor_location_name'] !== '') {
                                         $sellerLocationText = htmlspecialchars((string) $offer['vendor_location_name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -256,7 +266,11 @@ if ($inWishlistValue) {
                                     <tr>
                                         <td><?= htmlspecialchars($marketplaceValue) ?></td>
                                         <td>
-                                            <?= htmlspecialchars($sellerValue) ?>
+                                            <?php if ($sellerIsLinked): ?>
+                                                <a href="<?= $base ?>/seller/<?= $sellerSlugText ?>"><?= htmlspecialchars($sellerValue) ?></a>
+                                            <?php else: ?>
+                                                <?= htmlspecialchars($sellerValue) ?>
+                                            <?php endif; ?>
                                             <?php if ($sellerLocationText !== ''): ?>
                                                 <div class="text-muted small"><i class="bi bi-geo-alt"></i> <?= $sellerLocationText ?></div>
                                             <?php endif; ?>
@@ -337,6 +351,16 @@ if ($inWishlistValue) {
                                                 $sellerValue = 'General';
                                             }
 
+                                            $sellerSlugValue = '';
+                                            if (isset($offer['vendor_slug']) && $offer['vendor_slug'] !== null) {
+                                                $sellerSlugValue = (string) $offer['vendor_slug'];
+                                            }
+                                            $sellerSlugText = htmlspecialchars($sellerSlugValue, ENT_QUOTES | ENT_HTML5, 'UTF-8');
+                                            $sellerIsLinked = false;
+                                            if ($sellerSlugValue !== '') {
+                                                $sellerIsLinked = true;
+                                            }
+
                                             $sellerLocationText = '';
                                             if (isset($offer['vendor_location_name']) && $offer['vendor_location_name'] !== null && $offer['vendor_location_name'] !== '') {
                                                 $sellerLocationText = htmlspecialchars((string) $offer['vendor_location_name'], ENT_QUOTES | ENT_HTML5, 'UTF-8');
@@ -379,7 +403,11 @@ if ($inWishlistValue) {
                                             <tr>
                                                 <td><?= htmlspecialchars($marketplaceValue) ?></td>
                                                 <td>
-                                                    <?= htmlspecialchars($sellerValue) ?>
+                                                    <?php if ($sellerIsLinked): ?>
+                                                        <a href="<?= $base ?>/seller/<?= $sellerSlugText ?>"><?= htmlspecialchars($sellerValue) ?></a>
+                                                    <?php else: ?>
+                                                        <?= htmlspecialchars($sellerValue) ?>
+                                                    <?php endif; ?>
                                                     <?php if ($sellerLocationText !== ''): ?>
                                                         <div class="text-muted small"><i class="bi bi-geo-alt"></i> <?= $sellerLocationText ?></div>
                                                     <?php endif; ?>

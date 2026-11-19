@@ -39,7 +39,7 @@ class OfferModel extends Model
     public function findPublicByProductId(int $productId): array
     {
         $activeCondition = self::activeCondition();
-        $sql = "SELECT o.*, s.name AS store_name, v.name AS vendor_name, v.rating AS vendor_rating, v.store_rating AS vendor_store_rating, l.name AS vendor_location_name
+        $sql = "SELECT o.*, s.name AS store_name, v.name AS vendor_name, v.slug AS vendor_slug, v.rating AS vendor_rating, v.store_rating AS vendor_store_rating, l.name AS vendor_location_name
                 FROM {$this->table} o
                 LEFT JOIN stores s ON s.id = o.store_id
                 LEFT JOIN vendors v ON v.id = o.vendor_id

@@ -714,4 +714,51 @@ class ProductModel extends Model
 
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    /**
+     * Return published products that have an active offer from one vendor.
+     */
+    public function findPublishedByVendorId(int $vendorId, int $limit, int $offset): array
+    {
+        $activeCondition = OfferModel::activeCondition();
+        $sql = "SELECT p.*, c.name AS category_name, c.slug AS category_slug, b.name AS brand_name,
+                    (SELECT MIN(o.price_idr) FROM offers o
+                        INNER JOIN stores s ON s.id = o.store_id
+                        LEFT JOIN vendors v ON v.id = o.vendor_id
+                        WHERE o.product_id = p.id AND o.vendor_id = ? AND " . $activeCondition . ") AS lowest_price,
+                    (SELECT COUNT(*) FROM offers o
+                        INNER JOIN stores s ON s.id = o.store_id
+                        LEFT JOIN vendors v ON v.id = o.vendor_id
+                        WHERE o.product_id = p.id AND " . $activeCondition . ") AS offer_count
+                FROM {$this->table} p
+                LEFT JOIN categories c ON c.id = p.category_id
+                LEFT JOIN brands b ON b.id = p.brand_id
+                WHERE p.status = 'published'
+                    AND EXISTS (SELECT 1 FROM offers o
+                        INNER JOIN stores s ON s.id = o.store_id
+                        LEFT JOIN vendors v ON v.id = o.vendor_id
+                        WHERE o.product_id = p.id AND o.vendor_id = ? AND " . $activeCondition . ")
+                ORDER BY p.id DESC
+                LIMIT ? OFFSET ?";
+
+        return $this->queryPaginated($sql, [$vendorId, $vendorId], $limit, $offset);
+    }
+
+    /**
+     * Count published products that have an active offer from one vendor.
+     */
+    public function countPublishedByVendorId(int $vendorId): int
+    {
+        $activeCondition = OfferModel::activeCondition();
+        $sql = "SELECT COUNT(DISTINCT p.id) AS c FROM {$this->table} p
+                INNER JOIN offers o ON o.product_id = p.id
+                INNER JOIN stores s ON s.id = o.store_id
+                LEFT JOIN vendors v ON v.id = o.vendor_id
+                WHERE p.status = 'published' AND o.vendor_id = ? AND " . $activeCondition;
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$vendorId]);
+        $row = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        return (int) $row['c'];
+    }
 }
