@@ -172,9 +172,77 @@ class AdminProductController extends Controller
                 $data['image'] = $newFile;
             }
 
+            $rawOfferVendorId = '';
+            if (isset($_POST['offer_vendor_id']) && is_string($_POST['offer_vendor_id'])) {
+                $rawOfferVendorId = $_POST['offer_vendor_id'];
+            }
+            $rawOfferPriceIdr = '';
+            if (isset($_POST['offer_price_idr']) && is_string($_POST['offer_price_idr'])) {
+                $rawOfferPriceIdr = $_POST['offer_price_idr'];
+            }
+            $rawOfferAffiliateUrl = '';
+            if (isset($_POST['offer_affiliate_url']) && is_string($_POST['offer_affiliate_url'])) {
+                $rawOfferAffiliateUrl = $_POST['offer_affiliate_url'];
+            }
+            $rawOfferInStock = '';
+            if (isset($_POST['offer_in_stock']) && is_string($_POST['offer_in_stock'])) {
+                $rawOfferInStock = $_POST['offer_in_stock'];
+            }
+
+            $hasOffer = false;
+            if (trim($rawOfferVendorId) !== '' || trim($rawOfferPriceIdr) !== '' || trim($rawOfferAffiliateUrl) !== '') {
+                $hasOffer = true;
+            }
+
+            $offerVendorId = 0;
+            $offerPriceIdr = 0;
+            $offerAffiliateUrl = '';
+            $offerInStock = 0;
+            if ($hasOffer) {
+                if (!Validator::integer($rawOfferVendorId, 1)) {
+                    throw new Exception('Vendor is required.');
+                }
+                $offerVendorId = (int) $rawOfferVendorId;
+
+                $offerVendor = $this->vendorModel->findById($offerVendorId);
+                if (!$offerVendor) {
+                    throw new Exception('Selected vendor does not exist.');
+                }
+
+                $offerStoreId = 0;
+                if (isset($offerVendor['store_id'])) {
+                    $offerStoreId = (int) $offerVendor['store_id'];
+                }
+                $offerStore = $this->storeModel->findById($offerStoreId);
+                if (!$offerStore) {
+                    throw new Exception('Selected store does not exist.');
+                }
+
+                if (!Validator::integer($rawOfferPriceIdr, 1)) {
+                    throw new Exception('Price must be a positive integer.');
+                }
+                $offerPriceIdr = (int) $rawOfferPriceIdr;
+
+                $offerAffiliateUrl = $this->validateAffiliateUrl($rawOfferAffiliateUrl);
+
+                if ($rawOfferInStock !== '') {
+                    $offerInStock = 1;
+                }
+            }
+
             $newId = $this->productModel->insert($data);
             $this->seoMetaModel->saveMeta('product', $newId, $seoData);
-            $_SESSION['success'] = 'Product created. You can now add offers.';
+
+            if ($hasOffer) {
+                try {
+                    $this->insertProductOffer($newId, $offerVendorId, $offerPriceIdr, $offerAffiliateUrl, $offerInStock);
+                    $_SESSION['success'] = 'Product created with its first offer.';
+                } catch (Exception $e) {
+                    $_SESSION['error'] = 'Product created, but the offer could not be added: ' . $e->getMessage();
+                }
+            } else {
+                $_SESSION['success'] = 'Product created. You can now add offers.';
+            }
             $this->redirect('/dashboard/products/' . $newId . '/edit');
         } catch (Exception $e) {
             if ($newFile !== '') {
@@ -918,6 +986,10 @@ class AdminProductController extends Controller
             'description' => '',
             'image_alt' => '',
             'status' => 'draft',
+            'offer_vendor_id' => '',
+            'offer_price_idr' => '',
+            'offer_affiliate_url' => '',
+            'offer_in_stock' => '1',
             'seo_title' => '',
             'seo_description' => '',
             'canonical_url' => '',
@@ -964,6 +1036,20 @@ class AdminProductController extends Controller
         }
         if (isset($_POST['status'])) {
             $old['status'] = $_POST['status'];
+        }
+        if (isset($_POST['offer_vendor_id']) && is_string($_POST['offer_vendor_id'])) {
+            $old['offer_vendor_id'] = $_POST['offer_vendor_id'];
+        }
+        if (isset($_POST['offer_price_idr']) && is_string($_POST['offer_price_idr'])) {
+            $old['offer_price_idr'] = $_POST['offer_price_idr'];
+        }
+        if (isset($_POST['offer_affiliate_url']) && is_string($_POST['offer_affiliate_url'])) {
+            $old['offer_affiliate_url'] = $_POST['offer_affiliate_url'];
+        }
+        if (isset($_POST['offer_in_stock']) && is_string($_POST['offer_in_stock'])) {
+            $old['offer_in_stock'] = $_POST['offer_in_stock'];
+        } else {
+            $old['offer_in_stock'] = '';
         }
         if (isset($_POST['seo_title'])) {
             $old['seo_title'] = $_POST['seo_title'];

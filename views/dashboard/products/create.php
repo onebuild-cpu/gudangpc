@@ -56,6 +56,26 @@ if (isset($old['status'])) {
     $statusValue = $old['status'];
 }
 
+$offerVendorIdValue = '';
+if (isset($old['offer_vendor_id'])) {
+    $offerVendorIdValue = $old['offer_vendor_id'];
+}
+
+$offerPriceIdrValue = '';
+if (isset($old['offer_price_idr'])) {
+    $offerPriceIdrValue = $old['offer_price_idr'];
+}
+
+$offerAffiliateUrlValue = '';
+if (isset($old['offer_affiliate_url'])) {
+    $offerAffiliateUrlValue = $old['offer_affiliate_url'];
+}
+
+$offerInStockChecked = '';
+if (isset($old['offer_in_stock']) && $old['offer_in_stock'] !== '') {
+    $offerInStockChecked = 'checked';
+}
+
 $seoTitleValue = '';
 if (isset($old['seo_title'])) {
     $seoTitleValue = $old['seo_title'];
@@ -248,6 +268,47 @@ if ($robotsTagValue === 'noindex, follow') {
                                         <option value="draft" <?= $statusDraftSelected ?>>Draft</option>
                                         <option value="published" <?= $statusPublishedSelected ?>>Published</option>
                                     </select>
+                                </div>
+
+                                <hr>
+                                <h5 class="mt-3">First offer (optional)</h5>
+                                <p class="text-muted small">Leave all fields empty to add offers later.</p>
+
+                                <div class="mb-3">
+                                    <label for="offer_vendor_id" class="form-label">Seller</label>
+                                    <select class="form-select" id="offer_vendor_id" name="offer_vendor_id">
+                                        <option value="">Select vendor</option>
+                                        <?php foreach ($vendors as $vendor): ?>
+                                            <?php
+                                            $offerVendorSelected = '';
+                                            if ($offerVendorIdValue !== '' && $offerVendorIdValue == (int) $vendor['id']) {
+                                                $offerVendorSelected = 'selected';
+                                            }
+                                            ?>
+                                            <option value="<?= (int) $vendor['id'] ?>" <?= $offerVendorSelected ?>>
+                                                <?= htmlspecialchars((string) $vendor['name']) ?>
+                                                (<?= htmlspecialchars((string) $vendor['store_name']) ?>)
+                                            </option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                    <div class="form-text">The store is determined by the selected vendor.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="offer_price_idr" class="form-label">Price IDR</label>
+                                    <input type="text" class="form-control" id="offer_price_idr" name="offer_price_idr" placeholder="Price IDR" min="1" value="<?= htmlspecialchars((string) $offerPriceIdrValue) ?>">
+                                    <div class="form-text">Whole Rupiah amount, for example 1500000.</div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="offer_affiliate_url" class="form-label">Affiliate URL</label>
+                                    <input type="url" class="form-control" id="offer_affiliate_url" name="offer_affiliate_url" placeholder="Affiliate URL" maxlength="5000" value="<?= htmlspecialchars((string) $offerAffiliateUrlValue) ?>">
+                                    <div class="form-text">Must start with http:// or https://.</div>
+                                </div>
+
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="checkbox" id="offer_in_stock" name="offer_in_stock" value="1" <?= $offerInStockChecked ?>>
+                                    <label class="form-check-label" for="offer_in_stock">In Stock</label>
                                 </div>
                             </div>
 
