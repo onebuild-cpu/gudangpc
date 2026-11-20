@@ -297,7 +297,7 @@ STATUS: PENDING — see ticket GP-041
 
 ## Vendor Location feature (done)
 
-Done through tasks 4.1 to 4.5. Applied migrations: `023_locations.sql` (the `locations` table) and `024_vendor_location_description.sql` (`vendors.location_id` FK to `locations.id` ON DELETE RESTRICT and `vendors.description` varchar(1000) NULL). The old plan listed 023 as a `vendor_stores` join table and 024 as locations; the `vendor_stores` join table was NOT built and remains parked.
+Done through tasks 4.1 to 4.5. Applied changes, both included in `database/schema.sql`: 023 (the `locations` table) and 024 (`vendors.location_id` FK to `locations.id` ON DELETE RESTRICT and `vendors.description` varchar(1000) NULL). The old plan listed 023 as a `vendor_stores` join table and 024 as locations; the `vendor_stores` join table was NOT built and remains parked.
 
 Feature spec: `docs/PRODUCT_SPEC.md` §2 (Location glossary), §6 D5 (seller pages), §7 (Deleting content and Language), §8 (locations and vendors data model, schema history), §9 (seller route/page, homepage location sections, product page seller link) and §10 Parked item 6.
 

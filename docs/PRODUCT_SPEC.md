@@ -139,7 +139,7 @@ D2 is not a change: the wishlist stays, and members still register as `pending` 
 
 ## 8. Data model (as built today)
 
-Existing tables and columns. The schema is `database/migrations/dump_sql_gudangpc.sql` plus migrations 023 to 025; migration files 001 to 022 do not exist on disk.
+Existing tables and columns. The install schema is `database/schema.sql`, which includes migrations up to 025; migration files 001 to 025 are not kept in the repository.
 
 ### `users` (staff: root and admin)
 
@@ -299,14 +299,14 @@ AdminSearchController reads it and toggles is_indexed for sitemap inclusion.
 - unique key `(store_id, external_id)` on `offers` (NULL `external_id` rows may repeat);
 - `stores.affiliate_url_template` `varchar(500)` NULL.
 
-The structure-only schema is `database/schema.sql`, a `mysqldump --no-data` export taken after migration 025; migrations 023 to 025 are already included in it. New migrations start at 026. `database/initial_database.sql` does not contain the catalog tables. `database/migrations/dump_sql_gudangpc.sql` is kept only as history; it contains data rows (INSERT statements for `search_cache` and `users`), so it should be removed from the repository.
+The structure-only schema is `database/schema.sql`, a `mysqldump --no-data` export taken after migration 025; migrations 023 to 025 are already included in it. New migrations start at 026. `database/initial_database.sql` does not contain the catalog tables. The old data-bearing dump was removed from the repository because it contained INSERT statements for `search_cache` and `users`.
 
 **Migration 022** is applied. The `price_history` table, its index `idx_price_history_offer_recorded` and its foreign key to `offers` (`ON DELETE CASCADE`) exist in the current dump:
 
 - `price_history`: `id`, `offer_id` (`ON DELETE CASCADE`), `price_idr bigint unsigned`, `recorded_at datetime`;
 - index on `(offer_id, recorded_at)`; no `created_at` / `updated_at`.
 
-**Migrations 023, 024 and 025** are applied. Migration 023 creates the `locations` table (`database/migrations/023_locations.sql`); migration 024 adds `vendors.location_id` (FK to `locations.id`, `ON DELETE RESTRICT`) and `vendors.description` `varchar(1000)` NULL (`database/migrations/024_vendor_location_description.sql`); migration 025 adds `vendors.image` `varchar(255)` NULL (`database/migrations/025_vendors_image.sql`). The old plan for a `vendor_stores` join table was not built and remains parked.
+**Migrations 023, 024 and 025** are applied. Migration 023 creates the `locations` table; migration 024 adds `vendors.location_id` (FK to `locations.id`, `ON DELETE RESTRICT`) and `vendors.description` `varchar(1000)` NULL; migration 025 adds `vendors.image` `varchar(255)` NULL. All three are included in `database/schema.sql`. The old plan for a `vendor_stores` join table was not built and remains parked.
 
 New migrations are applied with `php bin/migrate.php` using the `status`, `up` and `baseline` commands. The runner records applied filenames in the `schema_migrations` table (`filename` varchar(190) primary key, `applied_at` timestamp default current_timestamp). The worker never runs the runner; the PO does.
 
